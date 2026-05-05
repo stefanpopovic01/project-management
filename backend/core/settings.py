@@ -127,9 +127,14 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 REST_FRAMEWORK = {
+    # 1. Who can access your API by default
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
+    # 2. How the API identifies who the user is
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
 }
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -141,3 +146,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # The URL that handles the media served from MEDIA_ROOT
 MEDIA_URL = '/media/'
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True, 
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
