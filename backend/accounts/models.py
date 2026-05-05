@@ -9,6 +9,7 @@ class User(AbstractUser):
     company = models.CharField(max_length=100, blank=True, null=True)
     location = models.CharField(max_length=100, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
+    initials = models.CharField(max_length=2, blank=True, null=True)
 
     image = models.ImageField(upload_to='avatars/', blank=True, null=True)
     skills = ArrayField(
@@ -22,6 +23,14 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
 
     REQUIRED_FIELDS = ['email'] 
+
+    def save(self, *args, **kwargs):
+      if self.first_name and self.last_name:
+          self.initials = f"{self.first_name[0]}{self.last_name[0]}".upper()
+      elif not self.initials:
+          self.initials = self.username[:2].upper()
+                
+      super().save(*args, **kwargs)
 
     def __str__(self):
         return self.email
