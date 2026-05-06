@@ -22,6 +22,8 @@ class User(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    following = models.ManyToManyField('self', through='Follow', symmetrical=False, related_name='followers')
+
     REQUIRED_FIELDS = ['email'] 
 
     def save(self, *args, **kwargs):
@@ -34,29 +36,16 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
-    
 
-"""
-REF: AbstractUser vs. models.Model
+class Follow(models.Model):
+    follower = models.ForeignKey(User, related_name='following_relationships', on_delete=models.CASCADE)
+    following = models.ForeignKey(User, related_name='follower_relationships', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-1. WHAT IS AbstractUser?
-   - It is a "ready-to-use" template provided by Django's auth system.
-   - It includes all the fields a standard user needs (username, password, email, 
-     first_name, last_name, is_staff, is_active, date_joined).
-   - It allows you to add your custom fields (like 'position' or 'company') 
-     without rebuilding the authentication logic from scratch.
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['follower', 'following'], name='unique_followers')
+        ]
 
-2. DIFFERENCE FROM models.Model:
-   - models.Model: A "blank slate." You have to define every single column 
-     manually. If you used this for a User, you would also have to manually 
-     write the logic for password hashing, login sessions, and permissions.
-   - AbstractUser: A "pre-configured" model. It inherits from Django's 
-     internal 'AbstractBaseUser' and 'PermissionsMixin', giving you access 
-     to built-in security features and the Django Admin login out-of-the-box.
-
-3. WHY USE IT?
-   - Security: You don't want to handle raw passwords. AbstractUser uses 
-     PBKDF2 hashing by default.
-   - Integration: Django's built-in apps (Admin, Password Reset, Auth 
-     Middleware) expect a user that follows this specific structure.
-"""
+    def __str__(self):
+        return f"{self.follower} follows {self.following}"
