@@ -6,13 +6,23 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import User, Follow
-from .serializers import RegisterSerializer, UserSearchSerializer
+from .serializers import RegisterSerializer, UserSearchSerializer, MyTokenObtainPairSerializer, UserSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
 from .permissions import IsAccountOwnerOrReadOnly
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
+
+# It’s a pre-built class-based view provided by DRF that already implements a full “create” endpoint for you. - POST Only
+# queryset - we need to refer it to Object we want to create, User in our case
+# Serializer defines what fields are acceptable, how data is validated and object created
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+# This is just short class to change default DNF login 
 
 class UserSearchView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -29,11 +39,17 @@ class UserSearchView(generics.ListAPIView):
             
         return User.objects.none()
 
+# ListAPIView is another prebuilt class-based view in Django REST Framework.
+# It is used when you want to create an endpoint that: only returns a list of objects (GET request)
+
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
-    serializer_class = RegisterSerializer
+    serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAccountOwnerOrReadOnly]
-    # We need her to Delete Projects & Tasks & Notifications related to User when deleting. Implement later..
+    """ We need here to Delete Projects & Tasks & Notifications related to User when deleting. Implement later.. """
+
+# it defines a ready-made API endpoint that works with a single object (one user)
+# we have everything here, get, patch, post, delete 
 
 class FollowToggleView(APIView):
     permission_classes = [IsAuthenticated]
@@ -53,7 +69,8 @@ class FollowToggleView(APIView):
         else:
             Follow.objects.create(follower=me, following=user_to_follow)
             return Response({"message": "Followed successfully", "following": True}, status=status.HTTP_201_CREATED)
-        
+
+# APIView is the most basic building block for views in Django REST Framework. Manually defining what happens for each http method
 
 class FollowersListView(generics.ListAPIView):
     serializer_class = UserSearchSerializer
