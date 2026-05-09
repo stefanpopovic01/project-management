@@ -64,7 +64,7 @@ class ProjectInvite(models.Model):
         on_delete=models.CASCADE, 
         related_name='sent_invites'
     )
-    email = models.EmailField() 
+    email = models.EmailField() # remove - add receiver
     status = models.CharField(
         max_length=10, 
         choices=InviteStatus.choices, 
