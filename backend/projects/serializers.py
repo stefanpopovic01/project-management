@@ -57,3 +57,4 @@ class ProjectInviteSerializer(serializers.ModelSerializer):
             )
 
         return data
+

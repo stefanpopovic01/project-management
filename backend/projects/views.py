@@ -11,6 +11,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.exceptions import PermissionDenied
 from django.utils import timezone
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 
 User = get_user_model()
 
@@ -83,6 +84,41 @@ class ProjectViewSet(ModelViewSet):
             project=project,
             user=self.request.user
         )
+
+        return project
+
+    @action(detail=True, methods=['post'], url_path='remove-member')
+    def remove_member(self, request, pk=None):
+        project = self.get_object()
+
+        # get user_id from request body
+        user_id = request.data.get('user_id')
+
+        if not user_id:
+            return Response(
+                {"detail": "user_id is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # find membership
+        member = get_object_or_404(
+            ProjectMember,
+            project=project,
+            user_id=user_id
+        )
+
+        # optional safety: prevent removing owner
+        if member.user == project.owner:
+            return Response(
+                {"detail": "You cannot remove project owner"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        member.delete()
+
+        return Response({
+            "message": "Member removed successfully"
+        }, status=status.HTTP_200_OK) 
 
 # GET /api/projects/?filter=created&search=Web&limit=5
 
