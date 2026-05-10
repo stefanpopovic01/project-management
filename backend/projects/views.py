@@ -1,10 +1,16 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import get_user_model
-from .models import Project, ProjectMember
-from .serializers import ProjectSerializer
-from .permissions import IsCreatorOrReadOnly
+from .models import Project, ProjectMember, ProjectInvite
+from .serializers import ProjectSerializer, ProjectInviteSerializer
+from .permissions import IsCreatorOrReadOnly, IsInviteParticipant
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied
+from django.utils import timezone
+from django.db.models import Q
 
 User = get_user_model()
 
@@ -78,13 +84,108 @@ class ProjectViewSet(ModelViewSet):
             user=self.request.user
         )
 
-
-''' 
-What Django does behind the scenes if you DON'T override:
-def list(self, request, *args, **kwargs):
-    queryset = self.get_queryset()
-    serializer = self.get_serializer(queryset, many=True)
-    return Response(serializer.data)
-Because you wanted to change the response (to add totalCount and count), you had to rewrite this method.'''
-
 # GET /api/projects/?filter=created&search=Web&limit=5
+
+class ProjectInviteViewSet(ModelViewSet):
+    serializer_class = ProjectInviteSerializer
+    permission_classes = [IsAuthenticated, IsInviteParticipant]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        return ProjectInvite.objects.filter(
+            Q(invited_by=user) | Q(receiver=user)
+        )
+
+    def perform_create(self, serializer):
+        project = serializer.validated_data['project']
+        receiver = serializer.validated_data['receiver']
+
+        if project.owner != self.request.user:
+            raise PermissionDenied("Only project owner can invite users.")
+
+        if receiver == self.request.user:
+            raise PermissionDenied("You cannot invite yourself.")
+
+        if ProjectInvite.objects.filter(
+            project=project,
+            receiver=receiver,
+            status=ProjectInvite.InviteStatus.PENDING
+        ).exists():
+            raise PermissionDenied("User already has a pending invite.")
+
+        if ProjectMember.objects.filter(
+            project=project,
+            user=receiver
+        ).exists():
+            raise PermissionDenied("User is already a member.")
+
+        serializer.save(
+            invited_by=self.request.user,
+            status=ProjectInvite.InviteStatus.PENDING
+        )
+
+    @action(detail=True, methods=['post'])
+    def accept(self, request, pk=None):
+        invite = self.get_object()
+
+        if invite.receiver != request.user:
+            return Response(
+                {"detail": "Not allowed"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if invite.status != ProjectInvite.InviteStatus.PENDING:
+            return Response(
+                {"detail": f"Already {invite.status}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        invite.status = ProjectInvite.InviteStatus.ACCEPTED
+        invite.accepted_at = timezone.now()
+        invite.save()
+
+        ProjectMember.objects.get_or_create(
+            project=invite.project,
+            user=request.user
+        )
+
+        return Response({
+            "message": "Invite accepted",
+            "status": invite.status
+        })
+
+    @action(detail=True, methods=['post'])
+    def decline(self, request, pk=None):
+        invite = self.get_object()
+
+        if invite.receiver != request.user:
+            return Response(
+                {"detail": "Not allowed"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if invite.status != ProjectInvite.InviteStatus.PENDING:
+            return Response(
+                {"detail": f"Already {invite.status}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        invite.status = ProjectInvite.InviteStatus.DECLINED
+        invite.save()
+
+        return Response({
+            "message": "Invite declined",
+            "status": invite.status
+        })
+
+    def destroy(self, request, *args, **kwargs):
+        invite = self.get_object()
+
+        if invite.invited_by != request.user:
+            return Response(
+                {"detail": "Not allowed"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        return super().destroy(request, *args, **kwargs)

@@ -38,29 +38,22 @@ class ProjectSerializer(serializers.ModelSerializer):
     def get_member_count(self, obj):
         return obj.projectmember_set.count()
 
-    # def create(self, validated_data):
-    #     request = self.context.get('request')
-    #     project = Project.objects.create(owner=request.user, **validated_data)
-        
-    #     ProjectMember.objects.create(project=project, user=request.user)
-    #     return project
-
 class ProjectInviteSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectInvite
-        fields = ['id', 'project', 'invited_by', 'email', 'receiver', 'status', 'expires_at']
+        fields = ['id','project','receiver','invited_by','status','expires_at']
         read_only_fields = ['invited_by', 'status']
-
-        ''' receiver field does not exist!!! '''
 
     def validate(self, data):
         project = data['project']
-        email = data['email']
-        
-        if ProjectMember.objects.filter(project=project, user__email=email).exists():
+        receiver = data['receiver']
+
+        if ProjectMember.objects.filter(project=project,user=receiver).exists():
             raise serializers.ValidationError("User is already a member of this project.")
-        
-        if ProjectInvite.objects.filter(project=project, email=email, status='pending').exists():
-            raise serializers.ValidationError("A pending invite already exists for this email.")
-            
+
+        if ProjectInvite.objects.filter(project=project,receiver=receiver,status=ProjectInvite.InviteStatus.PENDING).exists():
+            raise serializers.ValidationError(
+                "A pending invite already exists for this user."
+            )
+
         return data

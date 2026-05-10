@@ -64,11 +64,18 @@ class ProjectInvite(models.Model):
         on_delete=models.CASCADE, 
         related_name='sent_invites'
     )
-    email = models.EmailField() # remove - add receiver
+    email = models.EmailField()
     status = models.CharField(
         max_length=10, 
         choices=InviteStatus.choices, 
         default=InviteStatus.PENDING
+    )
+    receiver = models.ForeignKey(
+            settings.AUTH_USER_MODEL,
+            on_delete=models.SET_NULL,
+            null=True,
+            blank=True,
+            related_name='received_invites'
     )
     expires_at = models.DateTimeField()
     accepted_at = models.DateTimeField(null=True, blank=True)
