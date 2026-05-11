@@ -2,9 +2,9 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import get_user_model
-from .models import Project, ProjectMember, ProjectInvite
-from .serializers import ProjectSerializer, ProjectInviteSerializer
-from .permissions import IsCreatorOrReadOnly, IsInviteParticipant
+from .models import Project, ProjectMember, ProjectInvite, Task, Comment, ChecklistItem
+from .serializers import ProjectSerializer, ProjectInviteSerializer, TaskSerializer, CommentSerializer, ChecklistSerializer
+from .permissions import IsCreatorOrReadOnly, IsInviteParticipant, IsTaskCreatorOrAssignee
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -225,3 +225,147 @@ class ProjectInviteViewSet(ModelViewSet):
             )
 
         return super().destroy(request, *args, **kwargs)
+
+class TaskViewSet(ModelViewSet):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated, IsTaskCreatorOrAssignee]
+
+    def get_queryset(self):
+        user = self.request.user
+        project_id = self.request.query_params.get('project_id')
+        user_id = self.request.query_params.get('user_id')
+
+        if project_id:
+            project = get_object_or_404(Project, id=project_id)
+            if project.owner != user and not project.members.filter(id=user.id).exists():
+                raise PermissionDenied("You are not a member of this project.")
+            queryset = Task.objects.filter(project=project)
+
+        elif user_id:
+            if str(user.id) != str(user_id):
+                raise PermissionDenied("You can only view your own tasks.")
+            queryset = Task.objects.filter(assignee=user)
+
+        else:
+            queryset = Task.objects.filter(Q(created_by=user) | Q(assignee=user))
+
+        return queryset.select_related('assignee', 'project', 'created_by').prefetch_related('comments__author', 'checklist_items')
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        user_id = request.query_params.get('user_id')
+
+        if user_id:
+            now = timezone.now().date()
+            total = queryset.count()
+            completed = queryset.filter(status=Task.TaskStatus.DONE).count()
+            overdue = queryset.filter(due_date__lt=now).exclude(status=Task.TaskStatus.DONE).count()
+
+            serializer = self.get_serializer(queryset, many=True)
+            return Response({
+                "tasks": serializer.data,
+                "stats": {
+                    "total": total,
+                    "completed": completed,
+                    "overdue": overdue,
+                    "pending": total - completed
+                }
+            })
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            "count": queryset.count(),
+            "tasks": serializer.data
+        })
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    @action(detail=True, methods=['post'], url_path='comments') # detail=True already handles the task relation — it means the URL is /tasks/{pk}/add_comment/, so pk is the task ID
+    def add_comment(self, request, pk=None):
+        task = self.get_object()  # this fetches the task by pk AND runs has_object_permission
+        body = request.data.get('body')
+
+        if not body:
+            return Response(
+                {"message": "Body is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        comment = Comment.objects.create(
+            task=task,
+            author=self.request.user,
+            body=body
+        )
+
+        return Response({
+            "message": "Comment added successfully.",
+            "comment": CommentSerializer(comment).data
+        }, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['patch'], url_path='status')
+    def update_task_status(self, request, pk=None):
+        task = self.get_object()
+        new_status = request.data.get('status')
+
+        if not new_status:
+            return Response(
+                {"message": "Status is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        task.status = new_status
+        task.save()
+
+        return Response({
+            "message": "Status updated successfully.",
+            "task": TaskSerializer(task).data
+        })
+
+    @action(detail=True, methods=['patch'], url_path='checklist/(?P<item_id>[^/.]+)')
+    def update_checklist_item(self, request, pk=None, item_id=None):
+        task = self.get_object()
+        is_done = request.data.get('is_done')
+
+        if is_done is None:
+            return Response(
+                {"message": "is_done field is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        checklist_item = get_object_or_404(ChecklistItem, id=item_id, task=task)
+        checklist_item.is_done = is_done
+        checklist_item.save()
+
+        return Response({
+            "message": "Checklist item updated successfully.",
+            "checklist_item": ChecklistSerializer(checklist_item).data
+        })
+
+    @action(detail=True, methods=['post'], url_path='checklist')
+    def create_checklist_item(self, request, pk=None):
+        task = self.get_object()
+        text = request.data.get('text')
+
+        if not text:
+            return Response(
+                {"message": "Text field is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        checklist_item = ChecklistItem.objects.create(
+            task=task,
+            text=text,
+            is_done=request.data.get('is_done', False)
+        )
+
+        return Response({
+            "message": "Checklist item added successfully.",
+            "checklist_item": ChecklistSerializer(checklist_item).data
+        }, status=status.HTTP_201_CREATED)
+
+
+'''
+url_path='checklist/(?P<item_id>[^/.]+)' — this captures the item ID from the URL so your endpoint looks like PATCH 
+/tasks/{pk}/checklist/{item_id}/ 
+'''
