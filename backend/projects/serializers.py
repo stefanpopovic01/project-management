@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Project, ProjectMember, ProjectInvite, Task
+from .models import Project, ProjectMember, ProjectInvite, Task, ChecklistItem, Comment
 from accounts.serializers import UserSearchSerializer
 
 User = get_user_model() # Getting customized Abstract User from settings.py specifically AUTH_USER_MODEL
@@ -58,3 +58,46 @@ class ProjectInviteSerializer(serializers.ModelSerializer):
 
         return data
 
+class ProjectMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['id', 'title', 'description', 'owner']
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = UserSearchSerializer(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ['author', 'body', 'created_at', 'updated_at', 'task']
+
+class ChecklistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChecklistItem
+        fields = ['id', 'task', 'text', 'is_done', 'position', 'created_at', 'updated_at']
+
+class TaskSerializer(serializers.ModelSerializer):
+    assignee = UserSearchSerializer(read_only=True)
+    project = serializers.PrimaryKeyRelatedField(
+        queryset=Project.objects.all(),
+        write_only=True
+    )
+    project_detail = ProjectMinimalSerializer(
+        source='project',
+        read_only=True
+    )
+    task_comments = CommentSerializer(source='comments', many=True, read_only=True)
+    checklist = ChecklistSerializer(source='checklist_items', many=True, read_only=True)
+
+    total_checklist_items = serializers.SerializerMethodField()
+    completed_checklist_items = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Task
+        fields = ['id', 'project', 'title', 'description', 'status', 'priority', 'assignee', 'created_by', 'due_date', 'position', 'tags', 'deleted_at', 'created_at', 'updated_at', 'total_checklist_items', 'completed_checklist_items', 'task_comments', 'checklist', 'project_detail']
+        read_only_fields = ['created_by']
+
+    def get_total_checklist_items(self, obj):
+        return obj.checklist_items.count()
+
+    def get_completed_checklist_items(self, obj):
+        return obj.checklist_items.filter(is_done=True).count()
