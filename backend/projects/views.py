@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.exceptions import PermissionDenied
+from notifications.models import Notification
 from django.utils import timezone
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -161,6 +162,14 @@ class ProjectInviteViewSet(ModelViewSet):
             status=ProjectInvite.InviteStatus.PENDING
         )
 
+        Notification.objects.create(
+            actor=self.request.user,
+            recipient=receiver,
+            type=Notification.NotificationType.MEMBER_INVITED,
+            message=f"{self.request.user.first_name} {self.request.user.last_name} invited you to {project.title}.",
+            project=project
+        )
+
     @action(detail=True, methods=['post'])
     def accept(self, request, pk=None):
         invite = self.get_object()
@@ -279,7 +288,18 @@ class TaskViewSet(ModelViewSet):
         })
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        task = serializer.save(created_by=self.request.user)
+        assignee = task.assignee
+
+        if assignee and assignee != self.request.user:
+            Notification.objects.create(
+                actor=self.request.user,
+                recipient=assignee,
+                type=Notification.NotificationType.TASK_ASSIGNED,
+                message=f"{self.request.user.first_name} {self.request.user.last_name} assigned you to task \"{task.title}\".",
+                project=task.project,
+                task=task
+            )
 
     @action(detail=True, methods=['post'], url_path='comments') # detail=True already handles the task relation — it means the URL is /tasks/{pk}/add_comment/, so pk is the task ID
     def add_comment(self, request, pk=None):
@@ -298,6 +318,16 @@ class TaskViewSet(ModelViewSet):
             body=body
         )
 
+        if task.created_by != self.request.user:
+            Notification.objects.create(
+                actor=self.request.user,
+                recipient=task.created_by,
+                type=Notification.NotificationType.COMMENT_ADDED,
+                message=f"{self.request.user.first_name} {self.request.user.last_name} commented on \"{task.title}\".",
+                project=task.project,
+                task=task
+            )
+
         return Response({
             "message": "Comment added successfully.",
             "comment": CommentSerializer(comment).data
@@ -314,8 +344,19 @@ class TaskViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        old_status = task.status
         task.status = new_status
         task.save()
+
+        if task.created_by != self.request.user:
+            Notification.objects.create(
+                actor=self.request.user,
+                recipient=task.created_by,
+                type=Notification.NotificationType.TASK_MOVED,
+                message=f"{self.request.user.first_name} {self.request.user.last_name} moved \"{task.title}\" from {old_status} to {new_status}.",
+                project=task.project,
+                task=task
+            )
 
         return Response({
             "message": "Status updated successfully.",

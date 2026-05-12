@@ -76,7 +76,17 @@ class ChecklistSerializer(serializers.ModelSerializer):
         fields = ['id', 'task', 'text', 'is_done', 'position', 'created_at', 'updated_at']
 
 class TaskSerializer(serializers.ModelSerializer):
-    assignee = UserSearchSerializer(read_only=True)
+    assignee = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        required=False,
+        allow_null=True
+    )
+
+    assignee_detail = UserSearchSerializer(
+        source='assignee',
+        read_only=True
+    )
+
     project = serializers.PrimaryKeyRelatedField(
         queryset=Project.objects.all(),
         write_only=True
@@ -93,7 +103,7 @@ class TaskSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Task
-        fields = ['id', 'project', 'title', 'description', 'status', 'priority', 'assignee', 'created_by', 'due_date', 'position', 'tags', 'deleted_at', 'created_at', 'updated_at', 'total_checklist_items', 'completed_checklist_items', 'task_comments', 'checklist', 'project_detail']
+        fields = ['id', 'project', 'title', 'description', 'status', 'priority', 'assignee', 'created_by', 'due_date', 'position', 'tags', 'deleted_at', 'created_at', 'updated_at', 'total_checklist_items', 'completed_checklist_items', 'task_comments', 'checklist', 'project_detail', 'assignee_detail']
         read_only_fields = ['created_by']
 
     def get_total_checklist_items(self, obj):
