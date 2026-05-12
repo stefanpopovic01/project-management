@@ -9,6 +9,7 @@ from .models import User, Follow
 from .serializers import RegisterSerializer, UserSearchSerializer, MyTokenObtainPairSerializer, UserSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .permissions import IsAccountOwnerOrReadOnly
+from notifications.models import Notification
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -68,6 +69,12 @@ class FollowToggleView(APIView):
             return Response({"message": "Unfollowed successfully", "following": False}, status=status.HTTP_200_OK)
         else:
             Follow.objects.create(follower=me, following=user_to_follow)
+            Notification.objects.create(
+                actor=me,
+                recipient=user_to_follow,
+                type=Notification.NotificationType.USER_FOLLOWED,
+                message=f"{me.first_name} {me.last_name} started following you."
+            )
             return Response({"message": "Followed successfully", "following": True}, status=status.HTTP_201_CREATED)
 
 # APIView is the most basic building block for views in Django REST Framework. Manually defining what happens for each http method
