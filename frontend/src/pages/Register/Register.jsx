@@ -10,6 +10,7 @@ function Register() {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [password1, setPassword1] = useState("");
@@ -28,7 +29,7 @@ function Register() {
     }
 
     try {
-      const res = await register({ email, password, firstName, lastName });
+      const res = await register({ email, password, first_name: firstName, last_name: lastName, username });
 
       setSuccess(true);
       setError("");
@@ -59,6 +60,9 @@ function Register() {
 
         <label>Email</label>
         <input type="email" placeholder="Enter email" required value={email} onChange={(e) => setEmail(e.target.value)}/>
+
+        <label>Username</label>
+        <input type="text" placeholder="Enter username" required value={username} onChange={(e) => setUsername(e.target.value)}/>
 
         <label>Password</label>
         <input type="password" placeholder="********" required value={password} onChange={(e) => setPassword(e.target.value)}/>

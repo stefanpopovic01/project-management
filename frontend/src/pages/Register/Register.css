@@ -1,6 +1,6 @@
 .register-container {
   display: flex; justify-content: center; align-items: center;
-  height: 120vh;
+  height: 140vh;
   position: relative;
 }
 
