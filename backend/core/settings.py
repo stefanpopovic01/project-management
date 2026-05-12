@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'django.contrib.postgres',
-
+    "corsheaders",
     'rest_framework',
 
     'accounts',
@@ -55,6 +55,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware", 
+
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -137,6 +139,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    "UNAUTHENTICATED_USER": None,  # This triggers 401 instead of 403
 }
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -156,3 +159,8 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True, 
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
