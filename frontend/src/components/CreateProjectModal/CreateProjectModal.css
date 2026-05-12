@@ -1,0 +1,216 @@
+.cp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.364);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3001;
+}
+
+.cp-modal {
+  width: 37.5rem;
+  max-width: 95%;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2rem;
+  font-family: "Inter", sans-serif;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+  animation: cpFade 0.2s ease;
+}
+
+@keyframes cpFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.cp-header h2 {
+  font-size: 18px;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.cp-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #6b7280;
+}
+
+.cp-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.cp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cp-field label {
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.cp-field input,
+.cp-field textarea {
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.cp-field input:focus,
+.cp-field textarea:focus {
+  border-color: rgb(24, 104, 219);
+  box-shadow: 0 0 0 3px rgba(24, 104, 219, 0.1);
+}
+
+.cp-field textarea {
+  resize: none;
+  height: 5rem;
+}
+
+.cp-invite-wrapper {
+  position: relative;
+}
+
+.cp-invite-dropdown {
+  position: absolute;
+  top: 100%;
+  width: 100%;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  padding: 0.5rem 0;
+  z-index: 10;
+  max-height: 13.7rem;
+  overflow-y: auto; 
+  height: 8.1rem;
+}
+
+.cp-invite-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  transition: 0.2s;
+}
+
+.cp-invite-item:hover {
+  background: #f3f4f6;
+}
+
+.cp-invite-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.cp-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgb(24, 104, 219);
+}
+
+.cp-name {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.cp-username {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.cp-invite-btn {
+  background: rgb(24, 104, 219);
+  border: none;
+  color: white;
+  font-size: 12px;
+  padding: 0.4rem 0.7rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cp-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 1.8rem;
+}
+
+.cp-cancel {
+  background: #f3f4f6;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cp-create {
+  background: rgb(24, 104, 219);
+  border: none;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cp-succes-msg {
+  color: #065f46;
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cp-error-msg {
+  color: #991b1b;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .cp-modal{
+    max-width: 79%;
+  }
+
+}

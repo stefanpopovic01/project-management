@@ -1,0 +1,167 @@
+.navbar-container {
+  width: 100%;
+  border-bottom: 1px solid #eeeeee;
+  display: flex;
+  justify-content: center;
+  background-color: white;
+  position: fixed;
+  z-index: 100;
+  font-size: 16px;
+}
+
+.navbar-content {
+  width: 100%;
+  max-width: 80rem;
+  height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px 2rem 0px;
+}
+
+.navbar-logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  gap: 10px;
+}
+
+.logo-img {
+  height: 2.5rem;
+  width: auto;
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #000000;
+  letter-spacing: -1px;
+}
+
+.navbar-menu {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  justify-content: space-between;
+  margin-left: 2.5rem;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.nav-item:hover {
+  color: #1661d8;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.btn-login {
+  text-decoration: none;
+  color: #000;
+  font-weight: 600;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+}
+
+.btn-signup {
+  text-decoration: none;
+  background-color: rgb(24, 104, 219);
+  color: #fff;
+  font-weight: 600;
+  padding: 5px 15px;
+  border-radius: 6px;
+  transition: opacity 0.2s;
+  font-size: 0.9rem;
+}
+
+.btn-signup:hover {
+  opacity: 0.9;
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+}
+
+@media (max-width: 768px) {
+  .navbar-content {
+    padding: 0 20px;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .navbar-menu {
+    position: absolute;
+    top: 3.1rem;
+    left: 0;
+    width: 100%;
+    background: white;
+    flex-direction: column;
+    padding: 2.5rem 0;
+    box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+    display: none;
+    margin-left: 0;
+  }
+
+  .navbar-menu.active {
+    display: flex;
+    top: 100%;
+    padding: 0 0;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 0;
+  }
+
+  .nav-actions {
+    flex-direction: column;
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  .btn-signup {
+    width: 100%;
+    text-align: center;
+  }
+
+  .hamburger {
+    width: 25px;
+    height: 2px;
+    background: black;
+    display: block;
+    position: relative;
+  }
+  .hamburger::before, .hamburger::after {
+    content: '';
+    width: 25px;
+    height: 2px;
+    background: black;
+    position: absolute;
+    left: 0;
+  }
+  .hamburger::before { top: -8px; }
+  .hamburger::after { bottom: -8px; }
+}

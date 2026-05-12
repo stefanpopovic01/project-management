@@ -1,0 +1,554 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+.fy-page {
+  font-family: 'Inter', sans-serif;
+  background: #f9fafb;
+  min-height: calc(100vh - 3rem);
+  padding-top: 3rem;
+  margin-left: 13.65rem;
+  color: #111827;
+  box-sizing: border-box;
+}
+
+.fy-inner {
+  width: 92%;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 0 4rem;
+}
+
+.fy-hero {
+  background: linear-gradient(135deg, rgb(24, 104, 219) 0%, rgb(99, 102, 241) 60%, rgb(139, 92, 246) 100%);
+  margin-left: -4%;
+  margin-right: -4%;
+  padding: 2.5rem 4%;
+  margin-bottom: 2.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.fy-hero::before {
+  content: '';
+  position: absolute;
+  width: 22rem;
+  height: 22rem;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  top: -8rem;
+  right: -4rem;
+  pointer-events: none;
+}
+
+.fy-hero::after {
+  content: '';
+  position: absolute;
+  width: 14rem;
+  height: 14rem;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  bottom: -5rem;
+  right: 18rem;
+  pointer-events: none;
+}
+
+.fy-hero-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.fy-greeting-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 0.375rem;
+  letter-spacing: 0.01em;
+}
+
+.fy-greeting-name {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin: 0 0 0.5rem;
+}
+
+.fy-greeting-sub {
+  font-size: 0.9375rem;
+  color: rgba(255,255,255,0.65);
+  font-weight: 400;
+}
+
+.fy-greeting-sub strong {
+  color: rgba(255,255,255,0.9);
+  font-weight: 600;
+}
+
+.fy-hero-date {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.fy-hero-date-day {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.fy-hero-date-rest {
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.65);
+  margin-top: 0.25rem;
+}
+
+.fy-stats {
+  display: flex;
+  gap: 0;
+  margin-top: 2rem;
+  background: rgba(255,255,255,0.1);
+  border: 0.0625rem solid rgba(255,255,255,0.15);
+  border-radius: 0.875rem;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  position: relative;
+  z-index: 1;
+}
+
+.fy-stat {
+  flex: 1;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-right: 0.0625rem solid rgba(255,255,255,0.12);
+}
+
+.fy-stat:last-child { border-right: none; }
+
+.fy-stat-value {
+  font-size: 1.625rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.fy-stat-label {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.6);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.fy-stat-sub {
+  font-size: 0.6875rem;
+  color: rgba(255,255,255,0.45);
+  margin-top: 0.125rem;
+}
+
+.fy-body {
+  display: grid;
+  grid-template-columns: 1fr 21rem;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.fy-card {
+  background: #ffffff;
+  border: 0.0625rem solid #e5e7eb;
+  border-radius: 1.25rem;
+  box-shadow: 0 0.0625rem 0.1875rem rgba(0,0,0,0.06), 0 0.0625rem 0.125rem rgba(0,0,0,0.04);
+  overflow: hidden;
+}
+
+.fy-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.125rem 1.375rem 0;
+  margin-bottom: 1rem;
+}
+
+.fy-card-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fy-card-badge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 2rem;
+  background: rgba(24,104,219,0.08);
+  color: rgb(24,104,219);
+}
+
+.fy-card-link {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgb(24,104,219);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: opacity 0.15s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.fy-card-link:hover { opacity: 0.75; }
+.fy-card-link svg { width: 0.875rem; height: 0.875rem; }
+
+.fy-proj-list {
+  padding: 0 1.375rem 1.375rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fy-proj-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  border: 0.0625rem solid #e5e7eb;
+  border-radius: 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  background: #f9fafb;
+}
+
+.fy-proj-row:hover {
+  background: #ffffff;
+  border-color: rgba(24,104,219,0.25);
+  box-shadow: 0 0.125rem 0.5rem rgba(24,104,219,0.08);
+}
+
+.fy-proj-accent {
+  width: 0.25rem;
+  min-height: 2.5rem;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+}
+
+.fy-proj-accent.owned    { background: rgb(24,104,219); }
+.fy-proj-accent.assigned { background: #a78bfa; }
+
+.fy-proj-info { flex: 1; min-width: 0; }
+
+.fy-proj-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.25rem;
+}
+
+.fy-proj-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.fy-proj-status {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.fy-proj-status-dot { width: 0.375rem; height: 0.375rem; border-radius: 50%; flex-shrink: 0; }
+
+.fy-proj-status.active   { background: rgba(34,197,94,0.10);  color: #16a34a; }
+.fy-proj-status.active   .fy-proj-status-dot { background: #22c55e; }
+.fy-proj-status.review   { background: rgba(245,158,11,0.10); color: #d97706; }
+.fy-proj-status.review   .fy-proj-status-dot { background: #f59e0b; }
+.fy-proj-status.planning { background: rgba(24,104,219,0.10); color: rgb(24,104,219); }
+.fy-proj-status.planning .fy-proj-status-dot { background: rgb(24,104,219); }
+.fy-proj-status.archived { background: #f3f4f6; color: #6b7280; }
+.fy-proj-status.archived .fy-proj-status-dot { background: #d1d5db; }
+
+.fy-proj-tasks-count {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.fy-proj-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.375rem;
+  flex-shrink: 0;
+  min-width: 5rem;
+}
+
+.fy-proj-pct {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.fy-proj-bar-track {
+  width: 5rem;
+  height: 0.3125rem;
+  background: #f3f4f6;
+  border-radius: 2rem;
+  overflow: hidden;
+}
+
+.fy-proj-bar-fill {
+  height: 100%;
+  background: rgb(24,104,219);
+  border-radius: 2rem;
+  transition: width 0.4s ease;
+}
+.fy-proj-bar-fill.done { background: #22c55e; }
+
+.fy-proj-section-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #9ca3af;
+  padding: 0.25rem 0 0.25rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fy-proj-section-label::after {
+  content: '';
+  flex: 1;
+  height: 0.0625rem;
+  background: #f3f4f6;
+}
+
+.fy-tasks-list {
+  padding: 0 1.375rem 1.375rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.fy-task-row {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 0.875rem;
+  background: #f9fafb;
+  border: 0.0625rem solid #e5e7eb;
+  border-radius: 0.875rem;
+  transition: background 0.15s, border-color 0.15s;
+  cursor: pointer;
+}
+
+.fy-task-row:hover { background: #ffffff; border-color: rgba(24,104,219,0.2); }
+
+.fy-task-priority-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.fy-task-priority-dot.high   { background: #ef4444; }
+.fy-task-priority-dot.medium { background: #f59e0b; }
+.fy-task-priority-dot.low    { background: #22c55e; }
+
+.fy-task-info { flex: 1; min-width: 0; }
+
+.fy-task-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.1875rem;
+}
+
+.fy-task-project {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.fy-task-due-chip {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border-radius: 2rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.fy-task-due-chip.overdue  { background: rgba(239,68,68,0.09);  color: #dc2626; }
+.fy-task-due-chip.today    { background: rgba(245,158,11,0.09); color: #d97706; }
+.fy-task-due-chip.soon     { background: rgba(24,104,219,0.08); color: rgb(24,104,219); }
+.fy-task-due-chip.upcoming { background: #f3f4f6;               color: #6b7280; }
+
+.fy-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+.fy-empty-icon { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+
+.fy-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.fy-activity-list {
+  padding: 0 1.375rem 1.375rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.fy-activity-item {
+  display: flex;
+  gap: 0.75rem;
+  border-bottom: 0.0625rem solid #f3f4f6;
+  position: relative;
+}
+
+.fy-activity-item:last-child { border-bottom: none; }
+
+.fy-activity-av {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: rgba(24,104,219,0.08);
+  color: rgb(24,104,219);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.8rem;
+}
+
+.fy-activity-av img{
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.fy-activity-body { flex: 1; min-width: 0; }
+
+.fy-activity-text {
+  font-size: 0.8125rem;
+  color: #374151;
+  line-height: 1.45;
+}
+
+.fy-activity-time {
+  font-size: 0.6875rem;
+  color: #9ca3af;
+}
+
+
+.fy-quicklinks {
+  padding: 0 1.375rem 1.375rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fy-quicklink-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  border: 0.0625rem solid #e5e7eb;
+  border-radius: 0.875rem;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: 'Inter', sans-serif;
+  text-align: left;
+  width: 100%;
+}
+
+.fy-quicklink-btn:hover { background: #ffffff; border-color: rgba(24,104,219,0.25); }
+
+.fy-quicklink-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fy-quicklink-icon svg { width: 1rem; height: 1rem; }
+
+.fy-quicklink-icon.blue   { background: rgba(24,104,219,0.1); color: rgb(24,104,219); }
+.fy-quicklink-icon.purple { background: rgba(139,92,246,0.1); color: #7c3aed; }
+.fy-quicklink-icon.green  { background: rgba(34,197,94,0.1);  color: #16a34a; }
+
+.fy-quicklink-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+}
+
+.fy-quicklink-sub {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.0625rem;
+}
+
+.fy-quicklink-arrow {
+  margin-left: auto;
+  color: #d1d5db;
+  flex-shrink: 0;
+}
+.fy-quicklink-arrow svg { width: 1rem; height: 1rem; }
+
+
+@media (max-width: 64rem) {
+  .fy-page { margin-left: 0; }
+}
+
+@media (max-width: 56rem) {
+  .fy-body { grid-template-columns: 1fr; }
+  .fy-sidebar { display: contents; }
+}
+
+@media (max-width: 48rem) {
+  .fy-stats { flex-wrap: wrap; }
+  .fy-stat { min-width: 40%; border-right: none; border-bottom: 0.0625rem solid rgba(255,255,255,0.12); }
+  .fy-stat:nth-child(odd) { border-right: 0.0625rem solid rgba(255,255,255,0.12); }
+  .fy-hero-date { display: none; }
+  .fy-card{ max-width: 92vw; }
+}
+
+@media (max-width: 30rem) {
+  .fy-page { margin-top: 0; }
+  .fy-hero { padding: 1.75rem 4%; }
+  .fy-greeting-name { font-size: 1.5rem; }
+  .fy-stats { border-radius: 0.75rem; }
+}

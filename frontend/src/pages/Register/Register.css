@@ -1,0 +1,94 @@
+.register-container {
+  display: flex; justify-content: center; align-items: center;
+  height: 120vh;
+  position: relative;
+}
+
+.register-form {
+  background-color: white;
+  padding: 2.5rem 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  width: 20rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.register-form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: rgb(24, 104, 219);
+}
+
+.register-form label {
+  margin-bottom: 5px;
+  color: #333;
+  font-weight: bold;
+}
+
+.register-form input {
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  outline: none;
+  font-size: 1rem;
+}
+
+.register-form input:focus {
+  border-color: #1e3a8a;
+}
+
+.register-form button {
+  padding: 10px;
+  background-color: rgb(24, 104, 219);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.register-form button:hover {
+  background-color: #4087f9;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+  color: #555;
+}
+
+.login-link span {
+  color: rgb(24, 104, 219);
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.backgroundImg1{
+    position: absolute;
+    bottom: 0%;
+    left: 0%;
+    width: 30%;
+}
+
+.backgroundImg2{
+    position: absolute;
+    right: 0%;
+    bottom: 0%;
+    width: 30%;
+}
+
+@media (max-width: 768px) {
+  .register-form{
+    width: 18rem;
+  }
+
+  .backgroundImg1, .backgroundImg2{
+    width: 30%;
+    display: block;
+  }
+
+}
