@@ -2,8 +2,8 @@ import React, { useMemo, useContext, useState, useEffect } from "react";
 import "./ForYou.css";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contex/AuthContext";
-import { getAllUserTasks } from "../../api/services/taskServices";
-import { getUserProjects, getAssignedProjects } from "../../api/services/projectServices";
+import { getUserTasks } from "../../api/services/taskServices";
+import { getCreatedProjects, getAssignedProjects } from "../../api/services/projectServices";
 import { getNotifications } from "../../api/services/notificationServices";
 import { formatTimeAgo } from "../../utils/formatDate";
 
@@ -50,10 +50,10 @@ function pct(done, total) {
 }
 
 function ProjectRow({ project, onClick, userId }) {
-  const progress = pct(project.completedTasks, project.totalTasks);
+  const progress = pct(project.completed_tasks, project.total_tasks);
   const isDone   = progress === 100;
 
-  const isOwnProfile = userId == project.creator._id;
+  const isOwnProfile = userId == project.owner.id;
 
   return (
     <div className="fy-proj-row" onClick={() => onClick(project)}>
@@ -67,7 +67,7 @@ function ProjectRow({ project, onClick, userId }) {
             {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
           </span>
           <span className="fy-proj-tasks-count">
-            {project.completedTasks}/{project.totalTasks} tasks
+            {project.completed_tasks}/{project.total_tasks} tasks
           </span>
         </div>
       </div>
@@ -90,14 +90,14 @@ function ProjectRow({ project, onClick, userId }) {
 }
 
 function TaskRow({ task, onClick }) {
-  const chip = getDueChip(task.dueDate);
+  const chip = getDueChip(task.due_date);
 
   return (
     <div className="fy-task-row" onClick={() => onClick(task)}>
       <span className={`fy-task-priority-dot ${task.priority}`} />
       <div className="fy-task-info">
         <div className="fy-task-name">{task.title}</div>
-        <div className="fy-task-project">{task.project.title}</div>
+        <div className="fy-task-project">{task.project_detail.title}</div>
       </div>
       <span className={`fy-task-due-chip ${chip.cls}`}>{chip.label}</span>
     </div>
@@ -115,7 +115,7 @@ export default function ForYou({ currentUser }) {
   const dateLabel = formatDateDisplay();
 
   const handleProjectClick = (project) => {
-    navigate(`/dashboard-projects/${project._id}`, { state: { project } });
+    navigate(`/dashboard-projects/${project.id}`, { state: { project } });
   };
 
   const [loading, setLoading] = useState(true)
@@ -129,7 +129,7 @@ export default function ForYou({ currentUser }) {
     }
   });
 
-  const [projects, setProjects] = useState({ count: 0, projects: [] });
+  const [projects, setProjects] = useState({ count: 0, projects: [], totalCount: 0});
   const [assigned, setAssigned] = useState({ count: 0, projects: [] });
   const [notifications, setNotifications] = useState([]);
 
@@ -139,9 +139,9 @@ export default function ForYou({ currentUser }) {
       setLoading(true);
 
       const [taskRes, projectRes, assignedRes, notificationRes] = await Promise.all([
-        getAllUserTasks(id),
-        getUserProjects(id),
-        getAssignedProjects(id),
+        getUserTasks(id),
+        getCreatedProjects(4),
+        getAssignedProjects(4),
         getNotifications()
       ]);
 
@@ -158,7 +158,6 @@ export default function ForYou({ currentUser }) {
   };
 
   fetchDashboardData();
-  
 }, []);
 
   if (loading && projects.projects.length === 0) {
@@ -168,6 +167,7 @@ export default function ForYou({ currentUser }) {
       </div>
     );
   }
+
 
   return (
     <div className="fy-page">
@@ -179,7 +179,7 @@ export default function ForYou({ currentUser }) {
               <div className="fy-greeting-label">
                 Good {greeting.time} {greeting.emoji}
               </div>
-              <h1 className="fy-greeting-name">{user.firstName}</h1>
+              <h1 className="fy-greeting-name">{user.first_name}</h1>
               <p className="fy-greeting-sub">
                 {userTasks.stats.overdue > 0
                   ? <><strong>{userTasks.stats.overdue} task{userTasks.stats.overdue !== 1 ? "s" : ""} overdue</strong> - let's get caught up.</>
@@ -243,12 +243,12 @@ export default function ForYou({ currentUser }) {
               <div className="fy-proj-list">
                 <div className="fy-proj-section-label">My Projects</div>
                 {projects.count > 0
-                  ? projects.projects.slice(0, 4).map(p => <ProjectRow key={p._id} project={p} userId={id} onClick={() => handleProjectClick(p)} />)
+                  ? projects.projects.slice(0, 4).map(p => <ProjectRow key={p.id} project={p} userId={id} onClick={() => handleProjectClick(p)} />)
                   : <div className="fy-empty"><span className="fy-empty-icon">📁</span>No projects yet.</div>
                 }
                 <div className="fy-proj-section-label" style={{ marginTop: "0.5rem" }}>Assigned to Me</div>
                 {assigned.count > 0
-                  ? assigned.projects.slice(0, 4).map(p => <ProjectRow key={p._id} project={p} onClick={() => handleProjectClick(p)} />)
+                  ? assigned.projects.slice(0, 4).map(p => <ProjectRow key={p.id} project={p} onClick={() => handleProjectClick(p)} />)
                   : <div className="fy-empty"><span className="fy-empty-icon">🤝</span>None assigned yet.</div>
                 }
               </div>
@@ -267,7 +267,7 @@ export default function ForYou({ currentUser }) {
 
               <div className="fy-tasks-list">
                 {userTasks.stats.total > 0
-                  ? userTasks.tasks.slice(0, 4).map(t => <TaskRow key={t._id} task={t} />)
+                  ? userTasks.tasks.slice(0, 4).map(t => <TaskRow key={t.id} task={t} />)
                   : (
                     <div className="fy-empty">
                       <span className="fy-empty-icon">✅</span>
@@ -291,16 +291,16 @@ export default function ForYou({ currentUser }) {
 
               <div className="fy-activity-list">
                 {notifications.slice(0, 4).map((item) => {
-                  const timeAgo = item?.updatedAt ? formatTimeAgo(item.updatedAt) : "";
+                  const timeAgo = item?.created_at ? formatTimeAgo(item.created_at) : "";
 
                   return (
-                    <div key={item._id} className="fy-activity-item">
+                    <div key={item.id} className="fy-activity-item">
                       <div className={`fy-activity-av`}>
-                        {item.actor.avatarUrl ? (
-                          <img src={item.actor.avatarUrl} alt={item.actor.firstName} />
+                        {item.actor.image ? (
+                          <img src={item.actor.image} alt={item.actor.first_name} />
                         ) : (
                           <span>
-                            {((item.actor.firstName?.[0] || "") + (item.actor.lastName?.[0] || "")).toUpperCase()}
+                            {((item.actor.first_name?.[0] || "") + (item.actor.last_name?.[0] || "")).toUpperCase()}
                           </span>
                         )}
                       </div>
