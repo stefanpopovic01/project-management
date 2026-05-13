@@ -1,11 +1,15 @@
 import api from "../axios";
 
-export const getAllUserTasks = (id) => {
-    return api.get(`/task/userTasks/${id}`);
+export const getUserTasks = (userId) => {
+  return api.get(`/api/projects/tasks/?user_id=${userId}`);
 };
 
 export const getProjectTasks = (projectId) => {
-    return api.get(`/task/${projectId}/tasks`);
+  return api.get(`/tasks/?project_id=${projectId}`);
+};
+
+export const getMyTasks = () => {
+  return api.get('/tasks/');
 };
 
 export const getTask = (id) => {

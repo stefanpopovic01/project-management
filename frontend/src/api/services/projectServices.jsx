@@ -1,22 +1,62 @@
 import api from "../axios";
 
-export const getUserProjects = (id, search = "", limit = "") => {
-    return api.get(`/project/user/${id}`, {
-        params: { 
-            search, 
-            limit 
-        }
-    });
+export const getAllProjects = (limit = null) => {
+  return api.get('/api/projects/', {
+    params: {
+      ...(limit && { limit }),
+    },
+  });
 };
 
-export const getAssignedProjects = (id, search = "", aLimit = "") => {
-    return api.get(`/project/assigned/${id}`, {
-        params: { 
-            search, 
-            aLimit 
-        }
-    });
+export const getUserProjects = (userId, limit = null) => {
+  return api.get('/api/projects/', {
+    params: {
+      user_id: userId,
+      ...(limit && { limit }),
+    },
+  });
 };
+
+export const getCreatedProjects = (limit = null) => {
+  return api.get('/api/projects/', {
+    params: {
+      filter: 'created',
+      ...(limit && { limit }),
+    },
+  });
+};
+
+export const getAssignedProjects = (userId, limit = null) => {
+  return api.get('/api/projects/', {
+    params: {
+      filter: 'assigned',
+      ...(limit && { limit }),
+    },
+  });
+};
+
+export const searchProjects = (search, limit = null) => {
+  return api.get('/api/projects/', {
+    params: {
+      search,
+      ...(limit && { limit }),
+    },
+  });
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export const createProject = (projectData) => {
     return api.post("/project", projectData);
