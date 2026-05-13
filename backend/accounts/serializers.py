@@ -21,15 +21,29 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     # Overriding create because if we do not password would be saved as a plain test and like this it will be hashed
     # valdiated_date are clean, validated data from my API request
-    
-class UserSearchSerializer(serializers.ModelSerializer):
+
+
+class AbsoluteImageMixin:
+    def get_image(self, obj):
+        if not obj.image:
+            return None
+        request = self.context.get('request')
+        if request is not None:
+            return request.build_absolute_uri(obj.image.url)
+        from django.conf import settings
+        base_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
+        return f"{base_url.rstrip('/')}{obj.image.url}"
+
+class UserSearchSerializer(AbsoluteImageMixin, serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'initials', 'image']
+        fields = ['id', 'first_name', 'last_name', 'initials', 'image', 'email']
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(AbsoluteImageMixin, serializers.ModelSerializer):
     followers_count = serializers.IntegerField(source='followers.count', read_only=True)
     following_count = serializers.IntegerField(source='following.count', read_only=True)
+    image = serializers.SerializerMethodField()  # added
 
     # We do not have these two fields in model so we need to create them here, and source='followers.count' is equal to: followers.count()
 
@@ -46,7 +60,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
         # Checks if username/password are correct
 
-        data['user'] = UserSerializer(self.user).data
+        data['user'] = UserSerializer(self.user, context={'request': self.context.get('request')}).data
+
         # Uses the UserSerializer above to grab ALL data for the login response
         
         return data
