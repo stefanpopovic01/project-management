@@ -3,7 +3,7 @@ import "./DashboardProfile.css";
 import { useParams } from "react-router-dom";
 import { getUser, getFollowers, getFollowing, follow, unfollow } from "../../api/services/userServices";
 import { getUserProjects, getAssignedProjects } from "../../api/services/projectServices";
-import { getAllUserTasks } from "../../api/services/taskServices";
+// import { getAllUserTasks } from "../../api/services/taskServices";
 import { formatTimeAgo } from "..//../utils/formatDate";
 import EditProfileDrawer from "../../components/EditProfile/EditProfileDrawer"
 import { AuthContext } from "../../contex/AuthContext";
@@ -111,13 +111,13 @@ export default function DashboardProfile() {
     try {
       setLoading(true);
 
-      const [userRes, followersRes, followingRes, projectsRes, assignedRes, taskRes] = await Promise.all([
+      const [userRes, followersRes, followingRes, projectsRes, assignedRes] = await Promise.all([
         getUser(id),
         getFollowers(id),
         getFollowing(id),
         getUserProjects(id),
         getAssignedProjects(id),
-        getAllUserTasks(id)
+        // getAllUserTasks(id)
       ]);
 
       setUser(userRes.data);
@@ -125,7 +125,7 @@ export default function DashboardProfile() {
       setFollowing(followingRes.data);
       setProjects(projectsRes.data);
       setAssigned(assignedRes.data);
-      setUserTasks(taskRes.data)
+      // setUserTasks(taskRes.data)
 
     } catch (err) {
       console.error("Error loading profile data:", err);
