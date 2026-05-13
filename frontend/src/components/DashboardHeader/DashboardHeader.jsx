@@ -89,7 +89,7 @@ const fetchNavbarData = async () => {
       ]);
 
       setNotifications(notificationRes.data);
-      setUsers(userRes.data.users);
+      setUsers(userRes.data);
 
     } catch (err) {
       console.error("Error loading header data:", err);
@@ -108,6 +108,7 @@ const notificationDropdown = () => {
     toggleDropdown("notifications");
     fetchNavbarData();
 };
+
 
 return (
   <div className="dashboard-h-container">
@@ -129,20 +130,20 @@ return (
             <div className="db-search-container">
               {users.map((userItem, index) => (
                 <div className="db-search-user" key={index} onClick={() => {
-                  navigate(`/dashboard-profile/${userItem._id}`);
+                  navigate(`/dashboard-profile/${userItem.id}`);
                   setActiveDropdown(null);
                 }}>
                   <div className="db-search-avatar">
-                    {userItem.avatarUrl ? (
-                      <img src={userItem.avatarUrl} alt="profile" />
+                    {userItem.image ? (
+                      <img src={userItem.image} alt="profile" />
                     ) : (
                       <span className="header-initials hiSearch">
-                        {(userItem.firstName?.[0].toUpperCase() || "") + (userItem.lastName?.[0].toUpperCase() || "")}
+                        {(userItem.first_name?.[0].toUpperCase() || "") + (userItem.last_name?.[0].toUpperCase() || "")}
                       </span>
                     )}
                   </div>
                   <div className="db-search-info">
-                    <span className="db-search-name">{(userItem.firstName || "") + " " + (userItem.lastName || "")}</span>
+                    <span className="db-search-name">{(userItem.first_name || "") + " " + (userItem.last_name || "")}</span>
                     <span className="db-search-username">{userItem.email || ""}</span>
                   </div>
                 </div>
@@ -157,11 +158,11 @@ return (
         <i className="fa-regular fa-circle-question" onClick={() => toggleDropdown("help")}></i>
         <i className="fa-solid fa-gear" onClick={() => navigate(`/dashboard-profile/${id}`)}></i>
         <div className="dh-profile-logo" onClick={() => toggleDropdown("profile")}>
-          {user.avatarUrl ? (
-            <img src={user.avatarUrl} alt="user-logo" />
+          {user.image ? (
+            <img src={user.image} alt="user-logo" />
           ) : (
             <span className="header-initials">
-              {(user.firstName?.[0].toUpperCase() || "") + (user.lastName?.[0].toUpperCase() || "")}
+              {(user.first_name?.[0].toUpperCase() || "") + (user.last_name?.[0].toUpperCase() || "")}
             </span>
           )}
         </div>
@@ -196,11 +197,11 @@ return (
           {notifications.slice(0, 10).map((notif, index) => (
             <div className="dh-notif-item" key={index}>
               <div className="dh-notif-avatar">
-                {notif.actor?.avatarUrl ? (
-                  <img src={notif.actor.avatarUrl} alt="user-avatar" />
+                {notif.actor?.image ? (
+                  <img src={notif.actor.image} alt="user-avatar" />
                 ) : (
                   <span className="header-initials">
-                    {(notif.actor?.firstName?.[0].toUpperCase() || "") + (notif.actor?.lastName?.[0].toUpperCase() || "")}
+                    {(notif.actor?.first_name?.[0].toUpperCase() || "") + (notif.actor?.last_name?.[0].toUpperCase() || "")}
                   </span>
                 )}
               </div>
@@ -259,16 +260,16 @@ return (
         <div className='dh-dropdown-profile'>
           <div className='dh-dropdown-profile-frame'>
             <div className="dh-dropdown-img">
-              {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt="user-logo" />
+              {user.image ? (
+                <img src={user.image} alt="user-logo" />
               ) : (
                 <span className="header-initials hiLarger">
-                  {(user.firstName?.[0].toUpperCase() || "") + (user.lastName?.[0].toUpperCase() || "")}
+                  {(user.first_name?.[0].toUpperCase() || "") + (user.last_name?.[0].toUpperCase() || "")}
                 </span>
               )}
             </div>
             <div className='dh-dropdown-desc'>
-              <h3>{user.firstName}{" "}{user.lastName}</h3>
+              <h3>{user.first_name}{" "}{user.last_name}</h3>
               <p>{user.email}</p>
             </div>
           </div>
@@ -303,21 +304,21 @@ return (
         <div className="mobile-search-results">
           {users.map((userItem, index) => (
             <div className="db-search-user" key={index} onClick={() => {
-              navigate(`/dashboard-profile/${userItem._id}`);
+              navigate(`/dashboard-profile/${userItem.id}`);
               setActiveDropdown(null);
               setMobileSearch(false);
             }}>
               <div className="db-search-avatar">
-                {userItem.avatarUrl ? (
-                  <img src={userItem.avatarUrl} alt="profile" />
+                {userItem.image ? (
+                  <img src={userItem.image} alt="profile" />
                 ) : (
                   <span className="header-initials hiSearch">
-                    {(userItem.firstName?.[0].toUpperCase() || "") + (userItem.lastName?.[0].toUpperCase() || "")}
+                    {(userItem.first_name?.[0].toUpperCase() || "") + (userItem.last_name?.[0].toUpperCase() || "")}
                   </span>
                 )}
               </div>
               <div className="db-search-info">
-                <span className="db-search-name">{(userItem.firstName || "") + " " + (userItem.lastName || "")}</span>
+                <span className="db-search-name">{(userItem.first_name || "") + " " + (userItem.last_name || "")}</span>
                 <span className="db-search-username">{userItem.email || ""}</span>
               </div>
             </div>
@@ -334,15 +335,15 @@ return (
     <div className={`mobile-drawer ${mobileMenu ? 'open' : ''}`}>
       <div className="mobile-drawer-profile">
         <div className="mobile-drawer-avatar">
-          {user.avatarUrl
-            ? <img src={user.avatarUrl} alt="avatar" />
+          {user.image
+            ? <img src={user.image} alt="avatar" />
             : <span className="mobile-drawer-initials">
-                {(user.firstName?.[0].toUpperCase() || '') + (user.lastName?.[0].toUpperCase() || '')}
+                {(user.first_name?.[0].toUpperCase() || '') + (user.last_name?.[0].toUpperCase() || '')}
               </span>
           }
         </div>
         <div>
-          <p className="mobile-drawer-name">{user.firstName} {user.lastName}</p>
+          <p className="mobile-drawer-name">{user.first_name} {user.last_name}</p>
           <p className="mobile-drawer-email">{user.email}</p>
         </div>
       </div>
