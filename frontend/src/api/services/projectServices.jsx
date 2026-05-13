@@ -44,23 +44,13 @@ export const searchProjects = (search, limit = null) => {
   });
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const createProject = (projectData) => {
-    return api.post("/project", projectData);
+    return api.post("/api/projects/", projectData);
 };
+
+
+
+
 
 export const respondInvite = (projectId, action) => {
   return api.patch("/project/respond-invite", {
