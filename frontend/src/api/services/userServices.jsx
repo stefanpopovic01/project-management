@@ -25,9 +25,9 @@ export const unfollow = (id) => {
 }
 
 export const getUsers = (search = "") => {
-    return api.get(`/user`, {
+    return api.get(`/api/auth/search/`, {
         params: { 
-            search
+            q: search
         }
     });
 };
