@@ -28,7 +28,7 @@ function Login() {
           setSuccess(true);
           setError("");
           loginContext(res.data.user, res.data.access, res.data.refresh);
-          // navigate("/dashboard");
+          navigate("/dashboard");
 
         } catch (err) {
           setError(err.response?.data?.message || "Wrong credentials.");
