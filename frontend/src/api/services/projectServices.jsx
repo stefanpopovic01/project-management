@@ -48,16 +48,19 @@ export const createProject = (projectData) => {
     return api.post("/api/projects/", projectData);
 };
 
-
-
-
-
-export const respondInvite = (projectId, action) => {
-  return api.patch("/project/respond-invite", {
-    projectId,
-    action
-  });
+export const acceptInvite = (inviteId) => {
+    return api.post(`/api/projects/invites/${inviteId}/accept/`);
 };
+
+export const declineInvite = (inviteId) => {
+    return api.post(`/api/projects/invites/${inviteId}/decline/`);
+};
+
+
+
+
+
+
 
 export const getProject = (id) => {
     return api.get(`/project/${id}`)
