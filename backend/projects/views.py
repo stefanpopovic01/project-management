@@ -157,7 +157,7 @@ class ProjectInviteViewSet(ModelViewSet):
         ).exists():
             raise PermissionDenied("User is already a member.")
 
-        serializer.save(
+        invite = serializer.save(
             invited_by=self.request.user,
             status=ProjectInvite.InviteStatus.PENDING
         )
@@ -167,7 +167,8 @@ class ProjectInviteViewSet(ModelViewSet):
             recipient=receiver,
             type=Notification.NotificationType.MEMBER_INVITED,
             message=f"{self.request.user.first_name} {self.request.user.last_name} invited you to {project.title}.",
-            project=project
+            project=project,
+            invite=invite
         )
 
     @action(detail=True, methods=['post'])

@@ -59,9 +59,10 @@ class ProjectInviteSerializer(serializers.ModelSerializer):
         return data
 
 class ProjectMinimalSerializer(serializers.ModelSerializer):
+    members = ProjectMemberSerializer(source='projectmember_set', many=True, read_only=True)
     class Meta:
         model = Project
-        fields = ['id', 'title', 'description', 'owner']
+        fields = ['id', 'title', 'description', 'owner', 'members']
 
 class CommentSerializer(serializers.ModelSerializer):
     author = UserSearchSerializer(read_only=True)
