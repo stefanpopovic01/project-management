@@ -17,9 +17,10 @@ export const getUserProjects = (userId, limit = null) => {
   });
 };
 
-export const getCreatedProjects = (limit = null) => {
+export const getCreatedProjects = (userId, limit = null) => {
   return api.get('/api/projects/', {
     params: {
+      user_id: userId,
       filter: 'created',
       ...(limit && { limit }),
     },
@@ -29,6 +30,7 @@ export const getCreatedProjects = (limit = null) => {
 export const getAssignedProjects = (userId, limit = null) => {
   return api.get('/api/projects/', {
     params: {
+      user_id: userId,
       filter: 'assigned',
       ...(limit && { limit }),
     },
