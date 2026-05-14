@@ -13,7 +13,7 @@ export const getFollowing = (id) => {
 }
 
 export const editUser = (id, form) => {
-    return api.patch(`/user/${id}`, form);
+    return api.patch(`/api/auth/user/${id}/`, form);
 }
 
 export const follow = (id) => {
