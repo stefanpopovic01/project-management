@@ -56,15 +56,15 @@ export default function EditProfileDrawer({ isOpen, onClose, profile, onSave }) 
   const { id } = useParams();
 
   const [form, setForm] = useState({
-    firstName:   "",
-    lastName:    "",
+    first_name:   "",
+    last_name:    "",
     position:    "",
     company:     "",
     location:    "",
     email:       "",
     bio: "",
     skills:      [],
-    avatarUrl:   null,
+    image:   null,
   });
 
   const [newSkill, setNewSkill]   = useState("");
@@ -83,15 +83,15 @@ export default function EditProfileDrawer({ isOpen, onClose, profile, onSave }) 
   useEffect(() => {
     if (isOpen && profile) {
       setForm({
-        firstName:   profile.firstName   ?? "",
-        lastName:    profile.lastName    ?? "",
+        first_name:   profile.first_name   ?? "",
+        last_name:    profile.last_name    ?? "",
         position:    profile.position    ?? "",
         company:     profile.company     ?? "",
         location:    profile.location    ?? "",
         email:       profile.email       ?? "",
         bio:         profile.bio ?? "",
         skills:      [...(profile.skills ?? [])],
-        avatarUrl:   profile.avatarUrl   ?? null,
+        image:      profile.image   ?? null,
       });
       setNewSkill("");
       setIsDirty(false);
@@ -135,7 +135,7 @@ export default function EditProfileDrawer({ isOpen, onClose, profile, onSave }) 
     if (e.key === "Enter") { e.preventDefault(); addSkill(); }
   };
 
-  const initials = `${form.firstName?.[0] ?? ""}${form.lastName?.[0] ?? ""}`.toUpperCase();
+  const initials = `${form.first_name?.[0] ?? ""}${form.last_name?.[0] ?? ""}`.toUpperCase();
   const bioLen   = form.bio.length;
 
   const handleSave = async (e) => {
@@ -162,8 +162,6 @@ export default function EditProfileDrawer({ isOpen, onClose, profile, onSave }) 
       }
   };
 
-
-
   return createPortal(
     <>
       <div className={`epd-overlay${isOpen ? " open" : ""}`} onClick={handleClose} aria-hidden="true" />
@@ -189,7 +187,7 @@ export default function EditProfileDrawer({ isOpen, onClose, profile, onSave }) 
             <div className="epd-avatar-row">
               <div className="epd-avatar-preview">
                 <div className="epd-avatar">
-                  {form.avatarUrl ? <img src={form.avatarUrl} alt="Avatar preview" /> : initials || "?"}
+                  {form.image ? <img src={form.image} alt="Avatar preview" /> : initials || "?"}
                 </div>
                 <div
                   className="epd-avatar-overlay"
@@ -226,21 +224,21 @@ export default function EditProfileDrawer({ isOpen, onClose, profile, onSave }) 
                   className="epd-input"
                   type="text"
                   placeholder="Alex"
-                  value={form.firstName}
-                  onChange={set("firstName")}
+                  value={form.first_name}
+                  onChange={set("first_name")}
                   maxLength={40}
                 />
               </div>
 
               <div className="epd-field">
-                <label className="epd-label" htmlFor="epd-lastName">Last Name</label>
+                <label className="epd-label" htmlFor="epd-lastame">Last Name</label>
                 <input
                   id="epd-lastName"
                   className="epd-input"
                   type="text"
                   placeholder="Morrison"
-                  value={form.lastName}
-                  onChange={set("lastName")}
+                  value={form.last_name}
+                  onChange={set("last_name")}
                   maxLength={40}
                 />
               </div>
