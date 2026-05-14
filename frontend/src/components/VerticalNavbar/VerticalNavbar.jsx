@@ -22,13 +22,12 @@ const { user } = useContext(AuthContext);
 const id = user.id;
 
 const navigate = useNavigate();
-const debouncedSearchTerm = "";
 const limit = 3;
 
 useEffect(() => {
   const fetchRecentProjects = async () => {
     try {
-      const res = await getUserProjects(id, debouncedSearchTerm, limit);
+      const res = await getUserProjects(id, limit);
       setProjects(res.data);
     } catch (err) {
       console.log(err.response?.data?.message || "Something went wrong..");
@@ -37,7 +36,6 @@ useEffect(() => {
 
   fetchRecentProjects();
 }, []);
-
 
   return (
     <>
@@ -108,7 +106,7 @@ useEffect(() => {
             <p className="dh-sidebar-section-title">Recent Projects</p>
 
           {projects.projects?.map((project, index) => (
-            <div className="dh-sidebar-project" key={index} onClick={() => { navigate(`/dashboard-projects/${project._id}`); setSidebarOpen(false) }}>
+            <div className="dh-sidebar-project" key={index} onClick={() => { navigate(`/dashboard-projects/${project.id}`); setSidebarOpen(false) }}>
               <div className="dh-sidebar-project-icon">
                 <i className="fa-solid fa-layer-group"></i>
               </div>
@@ -119,7 +117,7 @@ useEffect(() => {
                 </span>
 
                 <span className="dh-sidebar-project-meta">
-                  {project.totalTasks || 0} tasks
+                  {project.total_tasks || 0} tasks
                 </span>
               </div>
             </div>
