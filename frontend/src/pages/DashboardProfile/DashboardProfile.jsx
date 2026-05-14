@@ -2,8 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import "./DashboardProfile.css";
 import { useParams } from "react-router-dom";
 import { getUser, getFollowers, getFollowing, follow, unfollow } from "../../api/services/userServices";
-import { getUserProjects, getAssignedProjects } from "../../api/services/projectServices";
-// import { getAllUserTasks } from "../../api/services/taskServices";
+import { getCreatedProjects, getAssignedProjects } from "../../api/services/projectServices";
 import { formatTimeAgo } from "..//../utils/formatDate";
 import EditProfileDrawer from "../../components/EditProfile/EditProfileDrawer"
 import { AuthContext } from "../../contex/AuthContext";
@@ -51,7 +50,7 @@ const Icon = {
 
 function ProjectCard({ project, showRole = false }) {
 
-  const timeAgo = project?.updatedAt ? formatTimeAgo(project.updatedAt) : "";
+  const timeAgo = project?.updated_at ? formatTimeAgo(project.updated_at) : "";
 
   return (
     <div className="dp-project-card">
@@ -83,7 +82,6 @@ function ProjectCard({ project, showRole = false }) {
 export default function DashboardProfile() {
 
   const { user: currentUser, updateUser } = useContext(AuthContext);
-
   const { id } = useParams();
   const [user, setUser] = useState(null);
   const [followers, setFollowers] = useState({ count: 0, followers: [] });
@@ -92,19 +90,10 @@ export default function DashboardProfile() {
   const [projects, setProjects] = useState({ count: 0, projects: [] });
   const [assigned, setAssigned] = useState({ count: 0, projects: [] });
 
-  const [userTasks, setUserTasks] = useState({
-    tasks: [],
-    stats: {
-      total: 0,
-      completed: 0,
-      overdue: 0,
-      pending: 0
-    }
-  });
-
   const [loading, setLoading] = useState(true);
   const [follow1, setFollow] = useState("");
   const [unfollow1, setUnfollow] = useState("");
+  const [isFollowing, setIsFollowing] = useState(false);
   
   useEffect(() => {
   const fetchDashboardData = async () => {
@@ -112,12 +101,11 @@ export default function DashboardProfile() {
       setLoading(true);
 
       const [userRes, followersRes, followingRes, projectsRes, assignedRes] = await Promise.all([
-        getUser(id),
+        getUser(id), 
         getFollowers(id),
         getFollowing(id),
-        getUserProjects(id),
+        getCreatedProjects(id),
         getAssignedProjects(id),
-        // getAllUserTasks(id)
       ]);
 
       setUser(userRes.data);
@@ -125,7 +113,11 @@ export default function DashboardProfile() {
       setFollowing(followingRes.data);
       setProjects(projectsRes.data);
       setAssigned(assignedRes.data);
-      // setUserTasks(taskRes.data)
+
+      const alreadyFollowing = followersRes.data?.followers?.some(
+        (user) => user.id?.toString() === currentUser?.id?.toString()
+      );
+      setIsFollowing(alreadyFollowing ?? false);
 
     } catch (err) {
       console.error("Error loading profile data:", err);
@@ -149,20 +141,20 @@ export default function DashboardProfile() {
     );
   }
 
-  const initials = (user.firstName?.[0] || "") + (user.lastName?.[0] || "");
+  const initials = (user.first_name?.[0] || "") + (user.last_name?.[0] || "");
   const displayInitials = initials.toUpperCase();
 
-  const joinedDate = new Date(user.createdAt).toLocaleDateString('en-US', {
+  const joinedDate = new Date(user.created_at).toLocaleDateString('en-US', {
     month: 'short',
     year: 'numeric'
   });
 
-  const isOwnProfile = currentUser?.id === user?._id;
+  const isOwnProfile = currentUser?.id === user?.id;
 
   const handleShare = async () => {
     const shareData = {
       title: "User Profile",
-      text: `Check out ${user.name}'s profile on our platform!`,
+      text: `Check out ${user.first_name}'s profile on our platform!`,
       url: window.location.href,
     };
 
@@ -178,18 +170,11 @@ export default function DashboardProfile() {
     }
   };
 
-  const isFollowing = currentUser?.following?.some(
-    (id) => id.toString() === user?._id?.toString()
-  );
-
   const handleFollow = async () => {
     try {
       const res = await follow(id);
-
-      updateUser({
-            following: [...currentUser.following, id]
-          });
-
+      setFollowers((prev) => ({ ...prev, count: prev.count + 1,}));
+      setIsFollowing(prev => !prev);       // optimistic
       setFollow(`${user.firstName} ${user.lastName} followed succesfully.`);
       
     } catch (err) {
@@ -199,11 +184,10 @@ export default function DashboardProfile() {
 
   const handleUnfollow = async () => {
     try {
-      const res = await unfollow(id);
+      const res = await follow(id);
+      setFollowers((prev) => ({ ...prev, count: prev.count - 1,}));
+  setIsFollowing(prev => !prev);       // optimistic
 
-      updateUser({
-            following: currentUser.following.filter(favId => favId !== id)
-          });
       setUnfollow(`${user.firstName} ${user.lastName} unfollowed succesfully.`);
       
     } catch (err) {
@@ -237,8 +221,8 @@ export default function DashboardProfile() {
             <div className="dp-profile-header">
               <div className="dp-avatar-wrap">
                 <div className="dp-avatar">
-                  {user.avatarUrl
-                    ? <img src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+                  {user.image
+                    ? <img src={user.image} alt={`${user.first_name} ${user.last_name}`} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
                     : displayInitials }
                 </div>
                 <div className="dp-avatar-badge" />
@@ -262,38 +246,42 @@ export default function DashboardProfile() {
 
             <div className="dp-profile-info">
               <h1 className="dp-name">
-                {user.firstName} {user.lastName}
+                {user.first_name} {user.last_name}
               </h1>
 
               <div className="dp-position-row">
-                <span className="dp-position">{user.position}</span>
+                <span className="dp-position">{user?.position || ""}</span>
                 <span className="dp-divider-dot" />
-                <span className="dp-company">{user.company}</span>
+                <span className="dp-company">{user?.company || ""}</span>
               </div>
 
               <div className="dp-meta-row">
-                <span className="dp-meta-item">{Icon.location}{user.location}</span>
+                <span className="dp-meta-item">{Icon.location}{user?.location || ""}</span>
                 <span className="dp-meta-item">{Icon.mail}{user.email}</span>
                 <span className="dp-meta-item">{Icon.clock}{`Joined ${joinedDate}`}</span>
               </div>
 
-              <p className="dp-description">{user.bio}</p>
+              <p className="dp-description">{user?.bio || ""}</p>
 
               <div className="dp-skills-row">
-                {user.skills.map((s) => (
-                  <span key={s} className="dp-skill-tag">{s}</span>
-                ))}
+                {user?.skills?.length > 0 &&
+                  user.skills.map((s) => (
+                    <span key={s} className="dp-skill-tag">
+                      {s}
+                    </span>
+                  ))
+                }
               </div>
             </div>
 
             <div className="dp-stats-strip">
               <div className="dp-stat">
-                <div className="dp-stat-value">{projects.count}</div>
+                <div className="dp-stat-value">{projects.totalCount}</div>
                 <div className="dp-stat-label">Projects</div>
               </div>
               <div className="dp-stat">
-                <div className="dp-stat-value">{userTasks.stats.completed}</div>
-                <div className="dp-stat-label">Contributions</div>
+                <div className="dp-stat-value">{assigned.totalCount}</div>
+                <div className="dp-stat-label">Collaborated On</div>
               </div>
               <div className="dp-stat">
                 <div className="dp-stat-value">{followers.count}</div>
@@ -313,11 +301,11 @@ export default function DashboardProfile() {
                   <span className="dp-section-title-dot" />
                   Created Projects
                 </span>
-                <span className="dp-section-count">{projects.count}</span>
+                <span className="dp-section-count">{projects.totalCount}</span>
               </div>
               <div className="dp-projects-list">
                 {projects.count > 0
-                  ? projects.projects.map((p) => <ProjectCard key={p._id} project={p} />)
+                  ? projects.projects.map((p) => <ProjectCard key={p.id} project={p} />)
                   : <div className="dp-empty">No projects created yet.</div>}
               </div>
             </div>
@@ -328,12 +316,12 @@ export default function DashboardProfile() {
                   <span className="dp-section-title-dot" />
                   Collaborated On
                 </span>
-                <span className="dp-section-count">{assigned.count}</span>
+                <span className="dp-section-count">{assigned.totalCount}</span>
               </div>
               <div className="dp-projects-list">
                 {assigned.count > 0
                   ? assigned.projects.map((p) => (
-                      <ProjectCard key={p._id} project={p} />
+                      <ProjectCard key={p.id} project={p} />
                     ))
                   : <div className="dp-empty">No collaborations yet.</div>}
               </div>

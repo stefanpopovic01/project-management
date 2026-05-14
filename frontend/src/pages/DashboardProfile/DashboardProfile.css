@@ -414,7 +414,6 @@
   position: absolute;
   left: 0; top: 0; bottom: 0;
   width: 0.1875rem;
-  background: var(--blue);
   border-radius: 0.1875rem 0 0 0.1875rem;
   opacity: 0;
   transition: opacity 0.18s;
