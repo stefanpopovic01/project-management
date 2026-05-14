@@ -6,7 +6,7 @@ import { AuthContext } from "../../contex/AuthContext";
 import { useContext } from "react";
 import { getUserProjects } from "../../api/services/projectServices";
 import { markAsRead, markAllRead } from "../../api/services/notificationServices";
-import { respondInvite } from "../../api/services/projectServices";
+import { acceptInvite, declineInvite } from "../../api/services/projectServices";
 
 const SidebarNotifications = ({ onClose }) => {
 
@@ -40,7 +40,7 @@ const handleMarkAsRead = async (notifId) => {
 
     setNotifications((prev) =>
       prev.map((notif) =>
-        notif._id === updatedNotif._id ? updatedNotif : notif
+        notif.id === updatedNotif.id ? updatedNotif : notif
       )
     );
   } catch (err) {
@@ -57,7 +57,7 @@ const handleMarkAllAsRead = async () => {
     setNotifications((prev) =>
       prev.map((notif) => ({
         ...notif,
-        isRead: true,
+        is_read: true,
       }))
     );
   } catch (err) {
@@ -67,34 +67,30 @@ const handleMarkAllAsRead = async () => {
   }
 };
 
-const handleRespondInvite = async (projectId, status) => {
+const handleAcceptInvite = async (notifId, inviteId) => {
   try {
-    await respondInvite(projectId, status);
-
-    setNotifications(prev =>
-      prev.map(notif => {
-        if (notif.project?._id !== projectId) return notif;
-
-        return {
-          ...notif,
-          project: {
-            ...notif.project,
-            members: notif.project.members.map(member =>
-              member.user?._id === id
-                ? { ...member, status }
-                : member
-            )
-          }
-        };
-      })
-    );
+    await acceptInvite(inviteId);
+    setNotifications((prev) => prev.map((notif) => notif.id === notifId ? {...notif, status: "accepted",} : notif ));
 
   } catch (err) {
     console.error(
-      err.response?.data?.message || "Failed to respond to invite"
+      err.response?.data?.message || "Failed to accept invite"
     );
   }
 };
+
+const handleDeclineInvite = async (notifId, inviteId) => {
+  try {
+    await declineInvite(inviteId);
+    setNotifications((prev) => prev.map((notif) => notif.id === notifId ? {...notif, status: "declined",} : notif ));
+
+  } catch (err) {
+    console.error(
+      err.response?.data?.message || "Failed to decline invite"
+    );
+  }
+};
+
 
 useEffect(() => {
   fetchNotificationData();
@@ -124,26 +120,23 @@ return (
         </div>
       ) : (
         notifications
-          ?.filter((notif) => notif.isRead === false)
+          ?.filter((notif) => notif.is_read === false)
           .map((notif, index) => {
             const actor = notif.actor;
             const isInvite = notif.type === "member_invited";
 
-            const memberStatus = notif.project?.members?.find(
-              m => m.user?._id === id
-            )?.status;
-
-            const isPending = memberStatus === "pending";
+            const memberStatus = notif.status;
+            const isPending = memberStatus === "pending";      
 
             return (
               <div className="sn-item sn-invite" key={index}>
                 <div className="sn-avatar">
-                  {actor?.avatarUrl ? (
-                    <img src={actor.avatarUrl} alt="profile" />
+                  {actor?.image ? (
+                    <img src={actor.image} alt="profile" />
                   ) : (
                     <span className="notif-initials">
-                      {(actor?.firstName?.[0]?.toUpperCase() || "") +
-                        (actor?.lastName?.[0]?.toUpperCase() || "")}
+                      {(actor?.first_name?.[0]?.toUpperCase() || "") +
+                        (actor?.last_name?.[0]?.toUpperCase() || "")}
                     </span>
                   )}
                 </div>
@@ -159,19 +152,19 @@ return (
 
                   {isInvite && isPending && (
                     <div className="sn-actions">
-                      <button className="sn-accept" onClick={() => handleRespondInvite(notif.project?._id, "accepted")}>Accept</button>
-                      <button className="sn-decline" onClick={() => handleRespondInvite(notif.project?._id, "declined")}>Decline</button>
+                      <button className="sn-accept" onClick={() => handleAcceptInvite(notif.id, notif?.invite)}>Accept</button>
+                      <button className="sn-decline" onClick={() => handleDeclineInvite(notif.id, notif?.invite)}>Decline</button>
                     </div>
                   )}
 
-                  <p className="sn-mark-read" onClick={() => handleMarkAsRead(notif._id)}>Mark as read</p>
+                  <p className="sn-mark-read" onClick={() => handleMarkAsRead(notif.id)}>Mark as read</p>
                 </div>
               </div>
             );
           })
       )}
 
-      {notifications?.some(n => !n.isRead) ? (
+      {notifications?.some(n => !n.is_read) ? (
         <p className="sn-mark-read all" onClick={handleMarkAllAsRead}>
           Mark all as read
         </p>
