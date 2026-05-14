@@ -5,7 +5,7 @@ import { AuthContext } from "../../contex/AuthContext";
 
 import SidebarNotifications from "../SidebarNotifications/SidebarNotifications";
 import CreateProjectModal from "../CreateProjectModal/CreateProjectModal";
-import { getUserProjects } from "../../api/services/projectServices";
+import { getCreatedProjects } from "../../api/services/projectServices";
 
 const VerticalNavbar = () => {
 
@@ -27,7 +27,7 @@ const limit = 3;
 useEffect(() => {
   const fetchRecentProjects = async () => {
     try {
-      const res = await getUserProjects(id, limit);
+      const res = await getCreatedProjects(id, limit);
       setProjects(res.data);
     } catch (err) {
       console.log(err.response?.data?.message || "Something went wrong..");
