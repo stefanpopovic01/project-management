@@ -87,6 +87,15 @@ class FollowersListView(generics.ListAPIView):
         user = get_object_or_404(User, pk=self.kwargs['pk'])
         return user.followers.all()
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response({
+            "count": queryset.count(),
+            "followers": serializer.data
+        })
+
 class FollowingListView(generics.ListAPIView):
     serializer_class = UserSearchSerializer
     permission_classes = [IsAuthenticated]
@@ -94,3 +103,12 @@ class FollowingListView(generics.ListAPIView):
     def get_queryset(self):
         user = get_object_or_404(User, pk=self.kwargs['pk'])
         return user.following.all()
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response({
+            "count": queryset.count(),
+            "followers": serializer.data
+        })

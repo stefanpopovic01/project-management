@@ -52,7 +52,7 @@ class UserSerializer(AbsoluteImageMixin, serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name', 
             'position', 'company', 'location', 'bio', 'image', 
-            'skills', 'initials', 'followers_count', 'following_count'
+            'skills', 'initials', 'followers_count', 'following_count', 'created_at'
         ]
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
