@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-from projects.models import Project, Task
+from projects.models import Project, Task, ProjectInvite
 
 class Notification(models.Model):
     class NotificationType(models.TextChoices):
@@ -16,6 +16,8 @@ class Notification(models.Model):
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
+
+    invite = models.ForeignKey(ProjectInvite, on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
     type = models.CharField(max_length=20, choices=NotificationType.choices)
 
     message = models.TextField(blank=True, default='')
