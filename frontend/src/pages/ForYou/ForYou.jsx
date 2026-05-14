@@ -140,8 +140,8 @@ export default function ForYou({ currentUser }) {
 
       const [taskRes, projectRes, assignedRes, notificationRes] = await Promise.all([
         getUserTasks(id),
-        getCreatedProjects(4),
-        getAssignedProjects(4),
+        getCreatedProjects(id, 4),
+        getAssignedProjects(id, 4),
         getNotifications()
       ]);
 
@@ -196,7 +196,7 @@ export default function ForYou({ currentUser }) {
 
           <div className="fy-stats">
             <div className="fy-stat">
-              <span className="fy-stat-value">{projects.count}</span>
+              <span className="fy-stat-value">{projects.totalCount}</span>
               <span className="fy-stat-label">My Projects</span>
               <span className="fy-stat-sub">
                 total
