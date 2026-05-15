@@ -27,7 +27,7 @@ const limit = 3;
 useEffect(() => {
   const fetchRecentProjects = async () => {
     try {
-      const res = await getCreatedProjects(id, limit);
+      const res = await getCreatedProjects(id, "", limit);
       setProjects(res.data);
     } catch (err) {
       console.log(err.response?.data?.message || "Something went wrong..");
