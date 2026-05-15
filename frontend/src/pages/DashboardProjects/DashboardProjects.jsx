@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./DashboardProjects.css";
 
 import CreateProjectModal from "../../components/CreateProjectModal/CreateProjectModal";
-import { getUserProjects, getAssignedProjects } from "../../api/services/projectServices";
+import { getCreatedProjects, getAssignedProjects } from "../../api/services/projectServices";
 import { AuthContext } from "../../contex/AuthContext";
 import { useContext } from "react";
 import { useParams } from "react-router-dom";
@@ -57,12 +57,12 @@ function AvatarStack({ members, max = 4 }) {
   return (
     <div className="dproj-avatars">
       {visible.map((m, i) => (
-        <div key={i} className="dproj-avatar" title={`${m.user.firstName} ${m.user.lastName}`}>
-          {m.user.avatarUrl ? (
-            <img src={m.user.avatarUrl} alt={m.user.firstName} />
+        <div key={i} className="dproj-avatar" title={`${m.user.first_name} ${m.user.last_name}`}>
+          {m.user.image ? (
+            <img src={m.user.image} alt={m.user.image} />
           ) : (
             <p>
-              {((m.user.firstName?.[0] || "") + (m.user.lastName?.[0] || "")).toUpperCase()}
+              {((m.user.first_name?.[0] || "") + (m.user.last_name?.[0] || "")).toUpperCase()}
             </p>
           )}
         </div>
@@ -73,7 +73,7 @@ function AvatarStack({ members, max = 4 }) {
 }
 
 function ProjectCard({ project, onClick, ownership }) {
-  const progress = pct(project.completedTasks, project.totalTasks);
+  const progress = pct(project.completed_tasks, project.total_tasks);
 
   const { label: deadlineLabel, overdue } = formatDeadline(project.deadline);
   const isDone = progress === 100;
@@ -92,7 +92,7 @@ function ProjectCard({ project, onClick, ownership }) {
       <div className="dproj-progress-wrap">
         <div className="dproj-progress-top">
           <span>Progress</span>
-          <span>{project.completedTasks} / {project.totalTasks} tasks</span>
+          <span>{project.completed_tasks} / {project.total_tasks} tasks</span>
         </div>
         <div className="dproj-progress-track">
           <div className={`dproj-progress-fill${isDone ? " done" : ""}`} style={{ width: `${progress}%` }} />
@@ -109,23 +109,23 @@ function ProjectCard({ project, onClick, ownership }) {
             {Icon.calendar} {overdue ? "Overdue · " : ""}{deadlineLabel}
           </span>
         </div>
-        <AvatarStack members={project.members.filter(m => m.status === "accepted")} />
+        <AvatarStack members={project.members} />
       </div>
 
       <div className="dproj-owner-row">
         <div className="dproj-owner-avatar">
-          {project.creator.avatarUrl ? (
+          {project.owner.image ? (
             <img 
-              src={project.creator.avatarUrl} 
-              alt={`${project.creator.firstName} ${project.creator.lastName}`} 
+              src={project.owner.image} 
+              alt={`${project.owner.first_name} ${project.owner.last_name}`} 
             />
           ) : (
             <p>
-              {(project.creator.firstName?.[0] || "") + (project.creator.lastName?.[0] || "").toUpperCase()}
+              {(project.owner.first_name?.[0] || "") + (project.owner.last_name?.[0] || "").toUpperCase()}
             </p>
           )}
         </div>
-        <span>by <span className="dproj-owner-name">{project.creator.firstName}{" "}{project.creator.lastName}</span></span>
+        <span>by <span className="dproj-owner-name">{project.owner.first_name}{" "}{project.owner.last_name}</span></span>
       </div>
     </div>
   );
@@ -173,7 +173,7 @@ export default function DashboardProjects() {
         setLoading(true);
   
         const [projectsRes, assignedRes] = await Promise.all([
-          getUserProjects(id, debouncedSearchTerm, limit),
+          getCreatedProjects(id, debouncedSearchTerm, limit),
           getAssignedProjects(id, debouncedSearchTerm, aLimit)
         ]);
   
@@ -241,7 +241,7 @@ export default function DashboardProjects() {
         <div className="dproj-grid">
           {projects.count > 0
             ? projects.projects.map((p) => (
-                <ProjectCard key={p._id} project={p} onClick={() => handleProjectClick(p._id)} ownership={"owned"}/>
+                <ProjectCard key={p.id} project={p} onClick={() => handleProjectClick(p.id)} ownership={"owned"}/>
               ))
             : <div className="dproj-empty"><span className="dproj-empty-icon">📁</span>No projects match your search.</div>
           }
@@ -278,7 +278,7 @@ export default function DashboardProjects() {
         <div className="dproj-grid">
           {assigned.count > 0
             ? assigned.projects.map((p) => (
-                <ProjectCard key={p._id} project={p} onClick={() => handleProjectClick(p._id)} ownership={"assigned"} />
+                <ProjectCard key={p.id} project={p} onClick={() => handleProjectClick(p.id)} ownership={"assigned"} />
               ))
             : <div className="dproj-empty"><span className="dproj-empty-icon">🤝</span>No assigned projects match your search.</div>
           }
