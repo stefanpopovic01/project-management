@@ -17,29 +17,22 @@ export const getUserProjects = (userId, limit = null) => {
   });
 };
 
-export const getCreatedProjects = (userId, limit = null) => {
+export const getCreatedProjects = (userId, search = "", limit = null) => {
   return api.get('/api/projects/', {
     params: {
       user_id: userId,
       filter: 'created',
+      search,
       ...(limit && { limit }),
     },
   });
 };
 
-export const getAssignedProjects = (userId, limit = null) => {
+export const getAssignedProjects = (userId, search = "", limit = null) => {
   return api.get('/api/projects/', {
     params: {
       user_id: userId,
       filter: 'assigned',
-      ...(limit && { limit }),
-    },
-  });
-};
-
-export const searchProjects = (search, limit = null) => {
-  return api.get('/api/projects/', {
-    params: {
       search,
       ...(limit && { limit }),
     },
