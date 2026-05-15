@@ -140,8 +140,8 @@ export default function ForYou({ currentUser }) {
 
       const [taskRes, projectRes, assignedRes, notificationRes] = await Promise.all([
         getUserTasks(id),
-        getCreatedProjects(id, 4),
-        getAssignedProjects(id, 4),
+        getCreatedProjects(id, "", 4),
+        getAssignedProjects(id, "", 4),
         getNotifications()
       ]);
 
