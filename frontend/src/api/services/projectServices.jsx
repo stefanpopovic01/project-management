@@ -51,24 +51,18 @@ export const declineInvite = (inviteId) => {
     return api.post(`/api/projects/invites/${inviteId}/decline/`);
 };
 
-
-
-
-
-
-
 export const getProject = (id) => {
-    return api.get(`/project/${id}`)
+    return api.get(`/api/projects/${id}/`)
 };
 
 export const updateProject = (id, data) => {
-  return api.patch(`/project/${id}`, data);
+  return api.patch(`/api/projects/${id}/`, data);
 };
 
-export const removeProjectMember = (projectId, userId) => {
-  return api.delete(`/project/${projectId}/members/${userId}`);
+export const removeProjectMember = (projectId, user_id) => {
+  return api.post(`/api/projects/${projectId}/remove-member/`, { user_id });
 };
 
 export const invite = (projectId, userId, expiresAt) => {
-  return api.post(`project/invite`, { projectId, userId, expiresAt });
+  return api.post(`/api/projects/invites/`, { project: projectId, receiver: userId, expires_at: expiresAt } );
 };

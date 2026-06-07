@@ -5,7 +5,7 @@ export const getUserTasks = (userId) => {
 };
 
 export const getProjectTasks = (projectId) => {
-  return api.get(`/tasks/?project_id=${projectId}`);
+  return api.get(`/api/projects/tasks/?project_id=${projectId}`);
 };
 
 export const getMyTasks = () => {
@@ -17,7 +17,7 @@ export const getTask = (id) => {
 };
 
 export const updateTaskStatus = (id, status) => {
-  return api.patch(`/task/${id}/status`, { status });
+  return api.patch(`/api/projects/tasks/${id}/status/`, { status });
 };
 
 export const addComment = (id, body) => {
@@ -29,5 +29,15 @@ export const updateChecklistItem = (taskId, itemId, isDone) => {
 };
 
 export const createTask = (payload) => {
-  return api.post("/task", payload);
+  return api.post("/api/projects/tasks/", payload);
 };
+
+export const createChecklist = (id, payload) => {
+  return api.post(`/api/projects/tasks/${id}/checklist/`, payload);
+};
+
+    // POST /tasks/<id>/checklist/
+    //     Add a new checklist item to a task.
+    //     Required body: { text }
+    //     Optional body: { is_done } → defaults to False
+    //     Permission: task creator only
