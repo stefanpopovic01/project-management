@@ -2,14 +2,24 @@ import React, { useState, useCallback, useRef, useEffect, useContext } from "rea
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import "./DashboardSingleProject.css";
 
-import { getProject, updateProject, removeProjectMember, invite } from "../../api/services/projectServices";
-import { getTask, createTask, getProjectTasks } from "../../api/services/taskServices";
+import { removeProjectMember, invite } from "../../api/services/projectServices";
+
+
+
+import { getTask, createTask } from "../../api/services/taskServices";
 import { updateTaskStatus, updateChecklistItem, addComment} from "../../api/services/taskServices";
 import { getUsers } from "../../api/services/userServices";
 import { AuthContext } from "../../contex/AuthContext";
 
 
+
+import { getProject } from "../../api/services/projectServices";
+import { updateProject } from "../../api/services/projectServices";
+import { getProjectTasks, createChecklist} from "../../api/services/taskServices";
+
+
 const Icon = {
+  closed: ( <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/> </svg> ),
   back: (<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="13 5 7 10 13 15" /></svg>),
   close: (<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8"><line x1="5" y1="5" x2="15" y2="15" /><line x1="15" y1="5" x2="5" y2="15" /></svg>),
   plus: (<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8"><line x1="10" y1="4" x2="10" y2="16" /><line x1="4" y1="10" x2="16" y2="10" /></svg>),
@@ -238,7 +248,7 @@ const sendComment = async () => {
 }
 
 function AddTaskDrawer({ isOpen, onClose, onAdd, defaultCol, members, projectId }) {
-  const EMPTY = { title: "", description: "", priority: "medium", due: "", checklist: [], tags: [], assigneeId: members?.[0]?.user?._id || null };
+  const EMPTY = { title: "", description: "", priority: "medium", due: "", checklist: [], tags: [], assigneeId: members?.[0]?.user?.id || null };
   const [form,        setForm]       = useState(EMPTY);
   const [col,         setCol]        = useState(defaultCol || "planned");
   const [checkInput,  setCheckInput] = useState("");
@@ -248,7 +258,7 @@ function AddTaskDrawer({ isOpen, onClose, onAdd, defaultCol, members, projectId 
 
   useEffect(() => {
     if (isOpen) {
-      setForm({ ...EMPTY, assigneeId: members?.[0]?.user?._id || null });
+      setForm({ ...EMPTY, assigneeId: members?.[0]?.user?.id || null });
       setCol(defaultCol || "planned");
       setCheckInput("");
       setTagInput("");
@@ -288,12 +298,12 @@ function AddTaskDrawer({ isOpen, onClose, onAdd, defaultCol, members, projectId 
 
   const getMemberDisplay = (member) => {
     const user = member?.user;
-    const firstName = user?.firstName || "";
-    const lastName  = user?.lastName  || "";
-    const avatarUrl = user?.avatarUrl  || "";
-    const initials  = `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase() || "?";
-    const name      = [firstName, lastName].filter(Boolean).join(" ") || user?.email || "Unknown";
-    return { avatarUrl, initials, name, id: user?._id };
+    const first_name = user?.first_name || "";
+    const last_name  = user?.last_name  || "";
+    const image = user?.image  || "";
+    const initials  = `${first_name[0] || ""}${last_name[0] || ""}`.toUpperCase() || "?";
+    const name      = [first_name, last_name].filter(Boolean).join(" ") || user?.email || "Unknown";
+    return { image, initials, name, id: user?.id };
   };
 
   const handleSave = async () => {
@@ -304,25 +314,30 @@ function AddTaskDrawer({ isOpen, onClose, onAdd, defaultCol, members, projectId 
         title:       form.title.trim(),
         description: form.description.trim(),
         project:     projectId,
-        assignedTo:  form.assigneeId || null,
+        assignee:    form.assigneeId || null,
         priority:    form.priority,
-        dueDate:     form.due || null,
+        due_date:     form.due || null,
         status:      col,
         tags:        form.tags,
-        checklist:   form.checklist,
-        comments:    [],
       };
 
       const response = await createTask(payload);
-      const task = response.data.task;
+      const task = response.data;
 
-      const selectedMember =
-        members?.find(m => m.user?._id === form.assigneeId) || members?.[0];
+      if (form.checklist.length > 0) {
+        await Promise.all(
+          form.checklist.map(item =>
+            createChecklist(task.id, { text: item.text })
+          )
+        );
+      }
+
+      const selectedMember = members?.find(m => m.user?.id === form.assigneeId) || members?.[0];
 
       const selectedUser = selectedMember?.user || null;
       
       onAdd({
-        _id:          task._id,
+        id:          task.id,
         status:      task.status,
         title:       task.title,
         description: task.description,
@@ -397,18 +412,18 @@ function AddTaskDrawer({ isOpen, onClose, onAdd, defaultCol, members, projectId 
               <label className="dsp-field-label">Assignee</label>
               <div className="dsp-members-row">
                 {members.map((member) => {
-                  const { avatarUrl, initials, name, id } = getMemberDisplay(member);
+                  const { image, initials, name, id } = getMemberDisplay(member);
                   const isSelected = form.assigneeId === id;
                   return (
                     <button
-                      key={member._id}
+                      key={member.user.id}
                       title={name}
                       className={`dsp-member-btn${isSelected ? " selected" : ""}`}
                       onClick={() => setForm(prev => ({ ...prev, assigneeId: id }))}
                     >
-                      {avatarUrl ? (
+                      {image ? (
                         <img
-                          src={avatarUrl}
+                          src={image}
                           alt={name}
                           className="dsp-member-avatar"
                           onError={(e) => {
@@ -419,7 +434,7 @@ function AddTaskDrawer({ isOpen, onClose, onAdd, defaultCol, members, projectId 
                       ) : null}
                       <span
                         className="dsp-member-initials"
-                        style={{ display: avatarUrl ? "none" : "flex" }}
+                        style={{ display: image ? "none" : "flex" }}
                       >
                         {initials}
                       </span>
@@ -439,7 +454,7 @@ function AddTaskDrawer({ isOpen, onClose, onAdd, defaultCol, members, projectId 
                   <span key={tag} className="dsp-tag-pill">
                     {tag}
                     <button className="dsp-tag-remove" onClick={() => removeTag(tag)} aria-label={`Remove tag ${tag}`}>
-                      {Icon.close}
+                        {Icon.closed}
                     </button>
                   </span>
                 ))}
@@ -524,7 +539,7 @@ function InviteDrawer({ isOpen, onClose, projectTitle, projectId, onInvite }) {
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await getUsers(val);
-        setResults(res.data.users || []);
+        setResults(res.data || []);
       } catch {
         setResults([]);
       } finally {
@@ -535,32 +550,37 @@ function InviteDrawer({ isOpen, onClose, projectTitle, projectId, onInvite }) {
 
   const toggleUser = (user) => {
     setSelectedUsers(prev =>
-      prev.find(u => u._id === user._id)
-        ? prev.filter(u => u._id !== user._id)
+      prev.find(u => u.id === user.id)
+        ? prev.filter(u => u.id !== user.id)
         : [...prev, user]
     );
   };
 
-  const removeUser = (id) => setSelectedUsers(prev => prev.filter(u => u._id !== id));
+  const removeUser = (id) => setSelectedUsers(prev => prev.filter(u => u.id !== id));
 
   const getInitials = (u) =>
-    ((u.firstName?.[0] ?? "") + (u.lastName?.[0] ?? "")).toUpperCase();
+    ((u.first_name?.[0] ?? "") + (u.last_name?.[0] ?? "")).toUpperCase();
 
   const handleSend = async () => {
     if (!selectedUsers.length) return;
     setSaving(true);
     try {
+    
       await Promise.all(
         selectedUsers.map(u =>
-          invite(projectId, u._id, expiresAt || null)
+          invite(projectId, u.id, expiresAt)
         )
       );
       onInvite?.(selectedUsers);
-    } finally {
+    } catch (err) {
+      console.error(err.response?.data); 
+    }
+    finally {
       setSaving(false);
       onClose();
     }
   };
+
 
   return (
     <>
@@ -595,21 +615,21 @@ function InviteDrawer({ isOpen, onClose, projectTitle, projectId, onInvite }) {
             {results.length > 0 && (
               <div className="dsp-user-results">
                 {results.map(u => {
-                  const isSelected = !!selectedUsers.find(s => s._id === u._id);
+                  const isSelected = !!selectedUsers.find(s => s.id === u.id);
                   return (
                     <div
-                      key={u._id}
+                      key={u.id}
                       className={`dsp-user-item${isSelected ? " selected" : ""}`}
                       onClick={() => toggleUser(u)}
                     >
                       <div className="dsp-avatar">
-                        {u.avatarUrl
-                          ? <img src={u.avatarUrl} alt={getInitials(u)} />
+                        {u.image
+                          ? <img src={u.image} alt={getInitials(u)} />
                           : getInitials(u)
                         }
                       </div>
                       <div className="dsp-user-info">
-                        <div className="dsp-user-name">{u.firstName} {u.lastName}</div>
+                        <div className="dsp-user-name">{u.first_name} {u.last_name}</div>
                         <div className="dsp-user-email">{u.email}</div>
                       </div>
                       {isSelected && <div className="dsp-check">{Icon.check}</div>}
@@ -631,15 +651,15 @@ function InviteDrawer({ isOpen, onClose, projectTitle, projectId, onInvite }) {
               <label className="dsp-field-label">Selected ({selectedUsers.length})</label>
               <div className="dsp-selected-chips">
                 {selectedUsers.map(u => (
-                  <div key={u._id} className="dsp-chip">
+                  <div key={u.id} className="dsp-chip">
                     <div className="dsp-chip-avatar">
-                      {u.avatarUrl
-                        ? <img src={u.avatarUrl} alt={getInitials(u)} />
+                      {u.image
+                        ? <img src={u.image} alt={getInitials(u)} />
                         : getInitials(u)
                       }
                     </div>
-                    {u.firstName} {u.lastName}
-                    <button className="dsp-chip-remove" onClick={() => removeUser(u._id)}>
+                    {u.first_name} {u.last_name}
+                    <button className="dsp-chip-remove" onClick={() => removeUser(u.id)}>
                       {Icon.close}
                     </button>
                   </div>
@@ -655,8 +675,8 @@ function InviteDrawer({ isOpen, onClose, projectTitle, projectId, onInvite }) {
               type="datetime-local"
               value={expiresAt}
               onChange={e => setExpiresAt(e.target.value)}
+              required
             />
-            <p className="dsp-email-hint">Leave blank for a permanent invite.</p>
           </div>
 
         </div>
@@ -667,7 +687,7 @@ function InviteDrawer({ isOpen, onClose, projectTitle, projectId, onInvite }) {
             <button
               className="dsp-drawer-btn save"
               onClick={handleSend}
-              disabled={saving || selectedUsers.length === 0}
+              disabled={saving || selectedUsers.length === 0 || expiresAt === ""}
             >
               {saving
                 ? <><span className="dsp-spinner" /> Sending…</>
@@ -719,30 +739,33 @@ const STATUS_OPTIONS = [
     try {
       setSaving(true);
 
-      const updated = await updateProject(project._id, form);
+      const payload = {
+        ...form,
+        deadline: form.deadline ? form.deadline : null, 
+      };
+      const updated = await updateProject(project.id, payload);
 
-      onSave?.(updated.data.project);
+      onSave?.(updated.data);
 
       setIsDirty(false);
       onClose();
     } catch (err) {
-      console.error(err);
+      console.error(err.response?.data); 
     } finally {
       setSaving(false);
     }
   };
 
-const handleRemoveMember = async (userId) => {
-  try {
-    setMembers(prev => prev.filter(m => m.user._id !== userId));
-    console.log("aaa", project._id, userId);
-    await removeProjectMember(project._id, userId);
+  const handleRemoveMember = async (userId) => {
+    try {
+      setMembers(prev => prev.filter(m => m.user.id !== userId));
+      await removeProjectMember(project.id, userId);
 
-    setIsDirty(true);
-  } catch (err) {
-    console.error(err);
-  }
-};
+      setIsDirty(true);
+    } catch (err) {
+      console.error(err.response?.data); 
+    }
+  };
 
   if (!project) return null;
 
@@ -810,27 +833,26 @@ const handleRemoveMember = async (userId) => {
             <div className="dsp-member-list">
               {members.map(m => {
                 return (
-                  <div key={m._id} className="dsp-member-row">
+                  <div key={m.user.id} className="dsp-member-row">
                     <div className="dsp-member-av">
-                      {m.user?.avatarUrl ? (
-                        <img src={m.user.avatarUrl} alt={`${m.user?.firstName ?? ""} ${m.user?.lastName ?? ""}`} style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover"}} />
-                        ) : ( `${m.user?.firstName?.[0] ?? ""}${m.user?.lastName?.[0] ?? ""}`.toUpperCase() )}
+                      {m.user?.image ? (
+                        <img src={m.user.image} alt={`${m.user?.first_name ?? ""} ${m.user?.last_name ?? ""}`} style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover"}} />
+                        ) : ( `${m.user?.first_name?.[0] ?? ""}${m.user?.last_name?.[0] ?? ""}`.toUpperCase() )}
                       </div>
 
                     <span className="dsp-member-name">
-                      {m.user?.firstName ?? ""} {m.user?.lastName ?? ""}
+                      {m.user?.first_name ?? ""} {m.user?.last_name ?? ""}
                     </span>
 
-                    <span className="dsp-member-role">
-                      {m?.status == "pending" ? "invited" : "member"}
-                    </span>
+                    {m.user.id != project.owner.id && (
+                      <button
+                        className="dsp-member-remove"
+                        onClick={() => handleRemoveMember(m.user.id)}
+                      >
+                        {Icon.trash}
+                      </button>
+                    )}
 
-                    <button
-                      className="dsp-member-remove"
-                      onClick={() => handleRemoveMember(m.user._id)}
-                    >
-                      {Icon.trash}
-                    </button>
                   </div>
                 );
               })}
@@ -920,29 +942,6 @@ export default function DashboardSingleProject() {
   const handleDragEnd   = useCallback(() => setDragOverCol(null), []); 
   const handleDragOver  = useCallback((e, colId) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setDragOverCol(colId); }, []);
 
-  const handleDrop = useCallback(async (e, colId) => {
-    e.preventDefault();
-
-    const taskId = e.dataTransfer.getData("taskId");
-
-    setTasks1(prev => ({
-      ...prev,
-      tasks: prev.tasks.map(task =>
-        task._id === taskId
-          ? { ...task, status: colId }
-          : task
-      )
-    }));
-
-  setDragOverCol(null);
-
-    try {
-      await updateTaskStatus(taskId, colId);
-    } catch (err) {
-      console.error(err);
-    }
-  }, []);
-
   const openTask = (task) => { setActiveTask(task); setTaskOpen(true); };
   const openAddTask = (col = "planned") => { setAddDefaultCol(col); setAddOpen(true); };
 
@@ -963,14 +962,36 @@ export default function DashboardSingleProject() {
         setTasks1(tasksRes.data);
   
       } catch (err) {
-        console.error("Error loading project data:", err);
+        console.error("Error loading project data: ", err);
       } finally {
         setLoading(false);
       }
   };
 
-    const isOwner = project1.creator?._id === user.id;
+  const handleDrop = useCallback(async (e, colId) => {
+    e.preventDefault();
 
+    const taskId = Number(e.dataTransfer.getData("taskId"));
+
+    setTasks1(prev => ({
+      ...prev,
+      tasks: prev.tasks.map(task =>
+        task.id === taskId
+          ? { ...task, status: colId }
+          : task
+      )
+    }));
+
+    setDragOverCol(null);
+
+    try {
+      await updateTaskStatus(taskId, colId);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [tasks1]);
+
+  const isOwner = project1.owner?.id === user.id;
   const [singleTask, setSingleTask] = useState({});
   const [isLoadingTask, setIsLoadingTask] = useState(false);
 
@@ -992,13 +1013,11 @@ export default function DashboardSingleProject() {
   };
 
   const dl = project1?.deadline ? fmtDate(project1.deadline) : null;
+
   const visibleMembers =
     (project1?.members || [])
-      .filter(m => m.status === "accepted")
       .slice(0, 5);
-
-  const acceptedMembers =
-    project1?.members?.filter(m => m.status === "accepted") || [];
+  const acceptedMembers = project1?.members || [];
 
     useEffect(() => {
         fetchProjectData();
@@ -1027,8 +1046,8 @@ export default function DashboardSingleProject() {
               <span className="dsp-meta-item">
                 {Icon.flag}
             <strong>
-              {project1?.creator 
-                ? `${project1.creator.firstName} ${project1.creator.lastName}` 
+              {project1?.owner 
+                ? `${project1.owner.first_name} ${project1.owner.last_name}` 
                 : "Unknown Creator"}
             </strong>
                 <span style={{ color: "#d1d5db", fontSize: "0.75rem" }}>Owner</span>
@@ -1046,11 +1065,11 @@ export default function DashboardSingleProject() {
                 {Icon.users}
                 <div className="dsp-meta-avatars">
                 {visibleMembers.map((m, i) => (
-                  <div key={i} className="dsp-meta-avatar" title={m?.user?.firstName || "Member"}>
-                    {m?.user?.avatarUrl ? (
-                      <img src={m.user.avatarUrl} alt="avatar" />
+                  <div key={i} className="dsp-meta-avatar" title={m?.user?.first_name || "Member"}>
+                    {m?.user?.image ? (
+                      <img src={m.user.image} alt="avatar" />
                     ) : (
-                      `${m?.user?.firstName?.[0] || ""}${m?.user?.lastName?.[0] || ""}`
+                      `${m?.user?.first_name?.[0] || ""}${m?.user?.last_name?.[0] || ""}`
                     )}
                   </div>
                 ))}
@@ -1062,9 +1081,9 @@ export default function DashboardSingleProject() {
               <span className="dsp-meta-divider" />
               <span className="dsp-meta-item">
                 {Icon.check}
-              <strong>{project1?.completedTasks ?? 0}</strong>
+              <strong>{project1?.completed_tasks ?? 0}</strong>
               <span style={{ color: "#9ca3af", fontSize: "0.75rem" }}>
-                / {project1?.totalTasks ?? 0} done
+                / {project1?.total_tasks ?? 0} done
               </span>
               </span>
             </div>
@@ -1124,43 +1143,43 @@ export default function DashboardSingleProject() {
                   </div>
                   <div className={`dsp-col-body${isOver ? " drag-over-zone" : ""}`}>
                     {colTasks.map(task => {
-                    const assigneeInitials = task.assignedTo
-                      ? `${task.assignedTo.firstName?.[0] || ""}${task.assignedTo.lastName?.[0] || ""}`.toUpperCase()
+                    const assigneeInitials = task.assignee_detail
+                      ? `${task.assignee_detail.first_name?.[0] || ""}${task.assignee_detail.last_name?.[0] || ""}`.toUpperCase()
                       : "";
-                    const { firstName = "", lastName = "" } = task.assignedTo || {};
+                    const { first_name = "", last_name = "" } = task.assignee_detail || {};
 
-                    const fullName = `${firstName} ${lastName}`.trim();
+                    const fullName = `${first_name} ${last_name}`.trim();
                     const assigneeName = fullName || "Unassigned";
 
                       const normalizedTask = {
-                        id:          task._id,
+                        id:          task.id,
                         col:         task.status,
                         title:       task.title,
                         description: task.description,
                         priority:    task.priority,
-                        due:         task.dueDate,
+                        due:         task.due_date,
                         tags:        task.tags || [],
                         checklist:   (task.checklist || []).map(c => ({
-                          id:   c._id,
+                          id:   c.id,
                           text: c.text,
-                          done: c.isDone,
+                          done: c.is_done,
                         })),
-                        comments: task.comments || [],
-                        assignee: { name: assigneeName, initials: assigneeInitials, avatarUrl: task.assignedTo?.avatarUrl || "" }, 
+                        comments: task.task_comments || [],
+                        assignee: { name: assigneeName, initials: assigneeInitials, avatarUrl: task.assignee_detail?.image || "" }, 
                       };
 
                     const taskAuth =
-                      task.createdBy === user.id ||
-                      task.assignedTo?._id === user.id;
+                      task.created_by === user.id ||
+                      task.assignee === user.id;
 
                       return (
                         <TaskCard
-                          key={task._id}
+                          key={task.id}
                           task={normalizedTask}
                           isOwner={taskAuth}
                           onDragStart={handleDragStart}
                           onDragEnd={handleDragEnd}
-                          onClick={() => handleTaskClick(task._id).then(() => setTaskOpen(true))}
+                          onClick={() => handleTaskClick(task.id).then(() => setTaskOpen(true))}
                         />
                       );
                     })}
@@ -1229,13 +1248,13 @@ export default function DashboardSingleProject() {
         currentUser={user}
       />
 
-
        <AddTaskDrawer
           isOpen={addOpen}
           onClose={() => setAddOpen(false)}
           defaultCol={addDefaultCol}
-          members={project1.members?.filter(m => m.status === "accepted") || []}
-                  onAdd={(newTask) => {
+          members={project1.members}
+          
+          onAdd={(newTask) => {
           setTasks1(prev => ({
             ...prev,
             tasks: [...prev.tasks, newTask],
@@ -1243,15 +1262,15 @@ export default function DashboardSingleProject() {
           }));
             toast.fire("Task added successfully");
           }}
-          projectId={project1._id}
+          projectId={project1.id}
       />
 
       <InviteDrawer
         isOpen={inviteOpen}
         onClose={() => setInviteOpen(false)}
         projectTitle={project1.title}
-        onInvite={(emails, role) => toast.fire(`Invited ${emails.length} person${emails.length !== 1 ? "s" : ""} as ${role}`)}
-        projectId={project1._id}
+        onInvite={(emails, role) => toast.fire(`Invited ${emails.length} person${emails.length !== 1 ? "s" : ""}`)}
+        projectId={project1.id}
       />
 
       <EditProjectDrawer
