@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import "./DashboardProfile.css";
 import { useParams } from "react-router-dom";
-import { getUser, getFollowers, getFollowing, follow, unfollow } from "../../api/services/userServices";
+import { getUser, getFollowers, getFollowing, follow } from "../../api/services/userServices";
 import { getCreatedProjects, getAssignedProjects } from "../../api/services/projectServices";
 import { formatTimeAgo } from "..//../utils/formatDate";
 import EditProfileDrawer from "../../components/EditProfile/EditProfileDrawer"

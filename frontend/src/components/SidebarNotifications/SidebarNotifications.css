@@ -15,16 +15,12 @@
   border: 1px solid #d7d7d7;
 }
 
-/* HEADER */
-
 .sn-header h2 {
   font-size: 16px;
   font-weight: 600;
   color: #1f1f23;
   margin-bottom: 1.5rem;
 }
-
-/* ITEM */
 
 .sn-item {
   display: flex;
@@ -41,13 +37,10 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
 }
 
-/* Invite highlight (suptilno plava) */
 .sn-invite {
   background: rgba(24, 104, 219, 0.04);
   border: 1px solid rgba(24, 104, 219, 0.15);
 }
-
-/* AVATAR */
 
 .sn-avatar {
   width: 46px;
@@ -64,8 +57,6 @@
   height: 100%;
   object-fit: cover;
 }
-
-/* CONTENT */
 
 .sn-content {
   display: flex;
@@ -99,8 +90,6 @@
   line-height: 1.4;
   margin-bottom: 0.75rem;
 }
-
-/* ACTION BUTTONS */
 
 .sn-actions {
   padding-top: 0.8rem;
@@ -155,7 +144,6 @@
 .sn-mark-read:hover{
   color: rgb(24, 104, 219);
 }
-
 
 .sn-loading {
   display: flex;
