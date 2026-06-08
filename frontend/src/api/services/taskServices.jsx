@@ -8,12 +8,12 @@ export const getProjectTasks = (projectId) => {
   return api.get(`/api/projects/tasks/?project_id=${projectId}`);
 };
 
-export const getMyTasks = () => {
-  return api.get('/tasks/');
-};
+// export const getMyTasks = () => {
+//   return api.get('/tasks/');
+// };
 
 export const getTask = (id) => {
-    return api.get(`/task/${id}`);
+    return api.get(`/api/projects/tasks/${id}/`);
 };
 
 export const updateTaskStatus = (id, status) => {
@@ -21,11 +21,11 @@ export const updateTaskStatus = (id, status) => {
 };
 
 export const addComment = (id, body) => {
-  return api.post(`/task/${id}/comments`, { body });
+  return api.post(`/api/projects/tasks/${id}/comments/`, { body });
 };
 
-export const updateChecklistItem = (taskId, itemId, isDone) => {
-  return api.patch(`/task/${taskId}/checklist/${itemId}`, { isDone });
+export const updateChecklistItem = (id, item_id, is_done) => {
+  return api.patch(`/api/projects/tasks/${id}/checklist/${item_id}/`, { is_done });
 };
 
 export const createTask = (payload) => {
@@ -35,9 +35,3 @@ export const createTask = (payload) => {
 export const createChecklist = (id, payload) => {
   return api.post(`/api/projects/tasks/${id}/checklist/`, payload);
 };
-
-    // POST /tasks/<id>/checklist/
-    //     Add a new checklist item to a task.
-    //     Required body: { text }
-    //     Optional body: { is_done } → defaults to False
-    //     Permission: task creator only
