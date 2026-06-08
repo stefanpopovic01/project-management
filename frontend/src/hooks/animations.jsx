@@ -4,9 +4,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/**
- * Strong reveal animation (titles, sections, CTA)
- */
+/* Strong reveal animation (titles, sections, CTA) */
+
 export function useRevealAnimation(ref, options = {}) {
   const {
     y = 60,
@@ -53,9 +52,8 @@ export function useRevealAnimation(ref, options = {}) {
   }, [ref, y, duration, delay, ease, stagger, start]);
 }
 
-/**
- * Soft reveal animation (cards, images, lists)
- */
+/*  Soft reveal animation (cards, images, lists) */
+
 export function useSoftReveal(ref, options = {}) {
   const {
     y = 20,
