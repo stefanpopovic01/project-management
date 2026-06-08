@@ -15,7 +15,6 @@ export default function Footer() {
             Where teams move projects from idea to done — together.
           </p>
           <div className="footer-socials">
-            <a href="#" className="social-dot" aria-label="Twitter">𝕏</a>
             <a href="https://www.linkedin.com/in/stefan-popovi%C4%87-03676a2a8/" className="social-dot" aria-label="LinkedIn">in</a>
             <a href="https://github.com/stefanpopovic01" className="social-dot" aria-label="GitHub">gh</a>
           </div>
@@ -49,7 +48,6 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <span>© {new Date().getFullYear()} Flowly. All rights reserved.</span>
-        <span className="footer-bottom-right">Built for teams that ship.</span>
       </div>
     </footer>
   );
