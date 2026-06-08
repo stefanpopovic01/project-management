@@ -19,7 +19,6 @@
     color: rgb(62, 62, 62);  font-size: 1.1rem;
     display: flex; align-items: center; gap: 1rem;
     font-weight: 100;
-    border-right: 1px solid #d4d5d7;
 }
 
 .dashboard-h-logo img{
@@ -30,7 +29,7 @@
 .dashboard-h-search{
     width: 80%; height: 100%;
     display: flex; align-items: center; gap: 0.5rem;
-    padding-left: 1rem;
+    /* padding-left: 1rem; */
     color: black;
 }
 
@@ -68,7 +67,7 @@
 
 .fa-sistrix{
     position: absolute;
-    left: 3%;
+    left: 1%;
     font-size: 1.1rem;
     color: rgb(127, 127, 127); 
 }
