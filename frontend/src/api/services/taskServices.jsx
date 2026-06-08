@@ -8,10 +8,6 @@ export const getProjectTasks = (projectId) => {
   return api.get(`/api/projects/tasks/?project_id=${projectId}`);
 };
 
-// export const getMyTasks = () => {
-//   return api.get('/tasks/');
-// };
-
 export const getTask = (id) => {
     return api.get(`/api/projects/tasks/${id}/`);
 };
