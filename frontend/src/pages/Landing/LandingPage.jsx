@@ -14,10 +14,7 @@ export default function Landing() {
       <section className="hero">
         <div className="hero-grid-bg" />
         <div className="hero-inner">
-          <div className="hero-badge">
-            <span className="hero-badge-dot" />
-            Now in public beta
-          </div>
+
           <h1 className="hero-title">
             Every task. Every team.<br />
             <em>One board.</em>
@@ -27,33 +24,12 @@ export default function Landing() {
           </p>
           <div className="hero-ctas">
             <Link to="/register" className="cta-primary">Start for free →</Link>  
-            <a href="#features" className="cta-ghost">See how it works</a>
-          </div>
-
-          <div className="hero-stats">
-            <div className="stat">
-              <strong>12k+</strong>
-              <span>Teams onboard</span>
-            </div>
-            <div className="stat-divider" />
-            <div className="stat">
-              <strong>3.4M</strong>
-              <span>Tasks completed</span>
-            </div>
-            <div className="stat-divider" />
-            <div className="stat">
-              <strong>98%</strong>
-              <span>Satisfaction rate</span>
-            </div>
           </div>
         </div>
 
         <div className="hero-visual">
           <div className="dashboard-mock">
             <div className="mock-topbar">
-              <div className="mock-dot red" />
-              <div className="mock-dot yellow" />
-              <div className="mock-dot green" />
               <span className="mock-label">Project Dashboard - Q4 Launch</span>
             </div>
             <div className="mock-columns">
@@ -121,20 +97,6 @@ export default function Landing() {
               </div>
             </div>
           </div>
-          <div className="hero-float-card top-right">
-            <span className="float-icon">👥</span>
-            <div>
-              <strong>5 people online</strong>
-              <span>Editing now</span>
-            </div>
-          </div>
-          <div className="hero-float-card bottom-left">
-            <span className="float-icon">⚡</span>
-            <div>
-              <strong>Task assigned</strong>
-              <span>Auth flow → Alex</span>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -151,7 +113,7 @@ export default function Landing() {
 
           <div className="features-grid">
             <div className="feature-card feature-card--large">
-              <div className="feature-icon" style={{background: '#eef3ff', color: '#1661d8'}}>⬛</div>
+              <div className="feature-icon">⬛</div>
               <h3>Kanban Board: Your Team's Heartbeat</h3>
               <p>Every project lives on one shared board. Three columns: <strong>Planning, In Progress, Done.</strong> Drag tasks between them in real time. Everyone sees the same picture instantly.</p>
               <div className="feature-img-placeholder">
@@ -161,31 +123,31 @@ export default function Landing() {
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon" style={{background: '#fffbeb', color: '#ca8a04'}}>🧩</div>
+              <div className="feature-icon">📁</div>
               <h3>Task Management</h3>
               <p>Create tasks with descriptions, due dates, priority levels and comments. Track every detail without leaving the board.</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon" style={{background: '#f0fdf4', color: '#16a34a'}}>👤</div>
+              <div className="feature-icon">👥</div>
               <h3>People & Profiles</h3>
               <p>Follow teammates, view their project history and experience. Know who's the right person before you assign.</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon" style={{background: '#fff1f2', color: '#e11d48'}}>🎯</div>
+              <div className="feature-icon">📋</div>
               <h3>Task Assignment</h3>
               <p>Drag a task, pick a person. Assignees get notified instantly. Accountability built in by design.</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon" style={{background: '#f5f3ff', color: '#7c3aed'}}>📊</div>
+              <div className="feature-icon">📊</div>
               <h3>Progress Tracking</h3>
               <p>Visual progress bars per task and per project. See how close you are to done at a glance, not after a meeting.</p>
             </div>
 
             <div className="feature-card feature-card--wide">
-              <div className="feature-icon" style={{background: '#eff6ff', color: '#1661d8'}}>🤝</div>
+              <div className="feature-icon">📝</div>
               <h3>Project Collaboration</h3>
               <p>Invite teammates to projects with a link. Manage roles and keep the right people in the loop without the chaos of email threads.</p>
               <div className="collab-visual">
