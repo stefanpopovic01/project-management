@@ -2,21 +2,10 @@ import React, { useState, useCallback, useRef, useEffect, useContext } from "rea
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import "./DashboardSingleProject.css";
 
-import { removeProjectMember, invite } from "../../api/services/projectServices";
-
-
-
-import { getTask, createTask } from "../../api/services/taskServices";
-import { updateTaskStatus, updateChecklistItem, addComment} from "../../api/services/taskServices";
+import { removeProjectMember, invite, getProject, updateProject } from "../../api/services/projectServices";
+import { updateTaskStatus, updateChecklistItem, addComment, getTask, createTask, getProjectTasks, createChecklist } from "../../api/services/taskServices";
 import { getUsers } from "../../api/services/userServices";
 import { AuthContext } from "../../contex/AuthContext";
-
-
-
-import { getProject } from "../../api/services/projectServices";
-import { updateProject } from "../../api/services/projectServices";
-import { getProjectTasks, createChecklist} from "../../api/services/taskServices";
-
 
 const Icon = {
   closed: ( <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/> </svg> ),
@@ -110,34 +99,34 @@ function TaskDetailDrawer({ task, colLabel, isOpen, onClose, currentUser }) {
       )
     );
   }
-};
-
-const sendComment = async () => {
-  if (!comment.trim()) return;
-
-  const text = comment.trim();
-  const taskId = task.id;
-
-  const initials =
-    `${currentUser.firstName?.[0] ?? ""}${currentUser.lastName?.[0] ?? ""}`.toUpperCase() || "?";
-
-  const newComment = {
-    author: `${currentUser.firstName ?? ""} ${currentUser.lastName ?? ""}`.trim(),
-    initials,
-    time: "Just now",
-    avatarUrl: currentUser.avatarUrl || "",
-    text
   };
 
-  setComments(prev => [...prev, newComment]);
-  setComment("");
+  const sendComment = async () => {
+    if (!comment.trim()) return;
 
-  try {
-    await addComment(taskId, text);
-  } catch (err) {
-    console.error(err);
-  }
-};
+    const text = comment.trim();
+    const taskId = task.id;
+
+    const initials =
+      `${currentUser.first_name?.[0] ?? ""}${currentUser.last_name?.[0] ?? ""}`.toUpperCase() || "?";
+
+    const newComment = {
+      author: `${currentUser.first_name ?? ""} ${currentUser.last_name ?? ""}`.trim(),
+      initials,
+      time: "Just now",
+      avatarUrl: currentUser.image || "",
+      text
+    };
+
+    setComments(prev => [...prev, newComment]);
+    setComment("");
+
+    try {
+      await addComment(taskId, text);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const due = task ? fmtDate(task.due) : null;
   const doneCount = checks.filter(c => c.done).length;
@@ -1193,51 +1182,51 @@ export default function DashboardSingleProject() {
 
       <TaskDetailDrawer
         task={(() => {
-          if (!singleTask?._id) return null;
+          if (!singleTask?.id) return null;
 
-          const a = singleTask.assignedTo;
+          const a = singleTask.assignee_detail;
 
           const assigneeName = a
-            ? `${a.firstName ?? ""} ${a.lastName ?? ""}`.trim() || "Unassigned"
+            ? `${a.first_name ?? ""} ${a.last_name ?? ""}`.trim() || "Unassigned"
             : "Unassigned";
 
           const assigneeInitials = a
-            ? `${a.firstName?.[0] ?? ""}${a.lastName?.[0] ?? ""}`.toUpperCase() || "?"
+            ? `${a.first_name?.[0] ?? ""}${a.last_name?.[0] ?? ""}`.toUpperCase() || "?"
             : "?";
 
           return {
-            id:          singleTask._id,
+            id:          singleTask.id,
             title:       singleTask.title,
             description: singleTask.description,
             priority:    singleTask.priority,
-            due:         singleTask.dueDate,
+            due:         singleTask.due_date,
             tags:        singleTask.tags || [],
             checklist:   (singleTask.checklist || []).map(c => ({
-              id:   c._id,
+              id:   c.id,
               text: c.text,
-              done: c.isDone,
+              done: c.is_done,
             })),
-            comments: (singleTask.comments || []).map(c => {
+            comments: (singleTask.task_comments || []).map(c => {
               const author = c.author;
 
               const authorName = typeof author === "object" && author !== null
-                ? `${author.firstName || ""} ${author.lastName || ""}`.trim()
+                ? `${author.first_name || ""} ${author.last_name || ""}`.trim()
                 : "Unknown";
 
               const authorInitials = typeof author === "object" && author !== null
-                ? `${author.firstName?.[0] || ""}${author.lastName?.[0] || ""}`.toUpperCase()
+                ? `${author.first_name?.[0] || ""}${author.last_name?.[0] || ""}`.toUpperCase()
                 : "?";
               return {
                 author:   authorName,
                 initials: authorInitials,
-                time:     c.createdAt
-                  ? new Date(c.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+                time:     c.created_at
+                  ? new Date(c.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })
                   : "",
                 text: c.body,
-                avatarUrl: author.avatarUrl || ""
+                avatarUrl: author.image || ""
               };
             }),
-            assignee: { name: assigneeName, initials: assigneeInitials, avatarUrl: a?.avatarUrl || null },
+            assignee: { name: assigneeName, initials: assigneeInitials, avatarUrl: a?.image || null },
           };
         })()}
         colLabel={

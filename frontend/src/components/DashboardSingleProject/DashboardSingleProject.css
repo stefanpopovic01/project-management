@@ -430,7 +430,6 @@
   background: #ffffff;
 }
 
-/* ── Search input ── */
 .dsp-search-wrap {
   position: relative;
   display: flex;
@@ -484,7 +483,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* ── User results list ── */
 .dsp-user-results {
   margin-top: 0.375rem;
   border: 0.0625rem solid #e5e7eb;
@@ -514,7 +512,6 @@
   text-align: center;
 }
 
-/* ── Avatar ── */
 .dsp-avatar {
   width: 2rem;
   height: 2rem;
@@ -567,7 +564,6 @@
 }
 .dsp-check svg { width: 0.625rem; height: 0.625rem; color: #ffffff; }
 
-/* ── Selected user chips ── */
 .dsp-selected-chips {
   display: flex;
   flex-wrap: wrap;
@@ -624,7 +620,6 @@
 .dsp-chip-remove svg { width: 0.625rem; height: 0.625rem; }
 .dsp-chip-remove:hover { color: #1d4ed8; }
 
-/* ── Expires At input ── */
 .dsp-expires-input {
   font-family: 'Inter', sans-serif;
   font-size: 0.875rem;
@@ -652,7 +647,6 @@
   margin-top: 0.25rem;
 }
 
-/* ── Footer actions ── */
 .dsp-drawer-actions {
   display: flex;
   gap: 0.5rem;
@@ -1130,7 +1124,6 @@
   color: white;
 }
 
-/* ── Members ──────────────────────────────────────────────────────────────── */
 .dsp-members-row {
   display: flex;
   flex-wrap: wrap;
@@ -1182,7 +1175,6 @@
   white-space: nowrap;
 }
 
-/* ── Tags ─────────────────────────────────────────────────────────────────── */
 .dsp-tags-row {
   display: flex;
   flex-wrap: wrap;
