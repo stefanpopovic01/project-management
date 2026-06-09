@@ -331,9 +331,9 @@ function AddTaskDrawer({ isOpen, onClose, onAdd, defaultCol, members, projectId 
         title:       task.title,
         description: task.description,
         priority:    task.priority,
-        assignedTo:  selectedUser,
+        assignee_detail:  selectedUser,
         tags:        task.tags,
-        dueDate:         task.dueDate || null,
+        due_date:         task.due_date || null,
         checklist:   task.checklist,
         comments:    [],
       });
