@@ -17,6 +17,9 @@ import DashboardSingleProject from './components/DashboardSingleProject/Dashboar
 
 import { Routes, Route, useLocation } from "react-router-dom";
 import { ProtectedRoute } from './routes/ProtectedRoute'
+import { useContext, useEffect } from 'react'
+import { AuthContext } from './contex/AuthContext'
+import { setSessionExpiredHandler } from './api/axios'
 
 function App() {
 
@@ -25,6 +28,11 @@ function App() {
   const isNotFound = !["/", "/login", "/register", "/contact", "/about"].some(
     (path) => location.pathname === path || location.pathname.startsWith("/dashboard")
   );
+  const { setIsSessionExpired } = useContext(AuthContext);
+
+  useEffect(() => {
+      setSessionExpiredHandler(setIsSessionExpired);
+    }, [setIsSessionExpired]);
 
   return (
     <>

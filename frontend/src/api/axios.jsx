@@ -1,11 +1,17 @@
 import axios from "axios";
 
+let sessionExpiredHandler = null;
+
+export const setSessionExpiredHandler = (handler) => {
+    sessionExpiredHandler = handler;
+};
+
 const api = axios.create({
     // baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:8000",
     baseURL: "http://127.0.0.1:8000",
     timeout: 10000,
     headers: {
-    "Content-Type": "application/json",
+        "Content-Type": "application/json",
     },
 });
 
@@ -29,10 +35,11 @@ api.interceptors.request.use(
         console.error("[REQUEST ERROR]", error);  
         return Promise.reject(error); 
     }
-)
+);
 
 api.interceptors.response.use(
     (response) => {
+
         if (import.meta.env.DEV) {
             console.log("[RESPONSE]", response.status, response.config.url);
             console.log("[DATA]", response.data);
@@ -41,9 +48,34 @@ api.interceptors.response.use(
         return response;
     },
     async (error) => {
+        const originalRequest = error.config;
 
-        if (error.response?.status === 401) {
+        if (error.response?.status === 401 && !originalRequest._retry) {
             console.error("[401] Unauthorized — token missing or expired.");
+            originalRequest._retry = true; 
+
+            try {
+                const refreshToken = localStorage.getItem("refreshToken");
+                if (!refreshToken) throw new Error("No refresh token available.");
+
+                const response = await axios.post("http://127.0.0.1:8000/api/auth/token/refresh/", {
+                    refresh: refreshToken,
+                });
+
+                const newAccessToken = response.data.access;
+                localStorage.setItem("accessToken", newAccessToken);
+
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                return api(originalRequest); 
+                
+            } catch (refreshError) {
+                console.error("[REFRESH FAILED] Refresh token is also expired or invalid.");
+                
+                if (sessionExpiredHandler) {
+                    sessionExpiredHandler(true);
+                }
+                return Promise.reject(refreshError);
+            }
         }
 
         if (error.response?.status === 403) {
@@ -74,6 +106,6 @@ api.interceptors.response.use(
 
         return Promise.reject(error);  
     }
-)
+);
 
 export default api;
