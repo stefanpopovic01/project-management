@@ -91,7 +91,7 @@ export default function EditProfileDrawer({ isOpen, onClose, profile, onSave }) 
         email:       profile.email       ?? "",
         bio:         profile.bio ?? "",
         skills:      [...(profile.skills ?? [])],
-        image:      profile.image   ?? null,
+        image:      profile.image   ?? "",
       });
       setNewSkill("");
       setIsDirty(false);
@@ -109,6 +109,17 @@ export default function EditProfileDrawer({ isOpen, onClose, profile, onSave }) 
 
   const set = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
+    setIsDirty(true);
+  };
+
+  const onFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setForm((prev) => ({
+      ...prev,
+      image: file,
+    }));
     setIsDirty(true);
   };
 
@@ -139,28 +150,50 @@ export default function EditProfileDrawer({ isOpen, onClose, profile, onSave }) 
   const bioLen   = form.bio.length;
 
   const handleSave = async (e) => {
-      e.preventDefault();
-      setError("");
-      setSaving(true);
+        e.preventDefault();
+        setError("");
+        setSaving(true);
 
-      try {
-          const res = await editUser(id, form);
-          
-          setSuccess(true);
-          setIsDirty(false);
-          onSave(res.data); 
+        const dataPayload = new FormData();
 
-          setTimeout(() => {
-              onClose();
-          }, 1000); 
+        dataPayload.append("first_name", form.first_name);
+        dataPayload.append("last_name", form.last_name);
+        dataPayload.append("position", form.position);
+        dataPayload.append("company", form.company);
+        dataPayload.append("location", form.location);
+        dataPayload.append("email", form.email);
+        dataPayload.append("bio", form.bio);
 
-      } catch (err) {
-          setSuccess(false);
-          setError(err.response?.data?.message || "Something went wrong.");
-      } finally {
-          setSaving(false);
-      }
-  };
+        form.skills.forEach((skill) => dataPayload.append("skills", skill));
+
+        if (form.image && typeof form.image !== "string" && form.image instanceof File) {
+            dataPayload.append("image", form.image);
+}
+        // --- DEBUGGING LOGS ---
+console.log("--- WHAT REACT IS SENDING TO DJANGO ---");
+for (let [key, value] of dataPayload.entries()) {
+    console.log(`${key}:`, value, `(Type: ${typeof value})`);
+}
+console.log("---------------------------------------");
+
+        try {
+            const res = await editUser(id, dataPayload);
+            
+            setSuccess(true);
+            setIsDirty(false);
+            onSave(res.data); 
+
+            setTimeout(() => {
+                onClose();
+            }, 1000); 
+
+        } catch (err) {
+            setSuccess(false);
+            setError(err.response?.data?.message || "Something went wrong.");
+        } finally {
+            setSaving(false);
+        }
+    };
 
   return createPortal(
     <>
@@ -186,9 +219,16 @@ export default function EditProfileDrawer({ isOpen, onClose, profile, onSave }) 
             <span className="epd-section-label">Profile Photo</span>
             <div className="epd-avatar-row">
               <div className="epd-avatar-preview">
-                <div className="epd-avatar">
-                  {form.image ? <img src={form.image} alt="Avatar preview" /> : initials || "?"}
-                </div>
+              <div className="epd-avatar">
+                {form.image ? (
+                  <img 
+                    src={typeof form.image === "string" ? form.image : URL.createObjectURL(form.image)} 
+                    alt="Avatar preview" 
+                  />
+                ) : (
+                  initials || "?"
+                )}
+              </div>
                 <div
                   className="epd-avatar-overlay"
                   onClick={() => fileInputRef.current?.click()}
@@ -208,7 +248,7 @@ export default function EditProfileDrawer({ isOpen, onClose, profile, onSave }) 
                 </p>
                 <button className="epd-upload-btn" onClick={() => fileInputRef.current?.click()}> {Icon.upload} Upload photo </button>
               </div>
-              <input ref={fileInputRef} className="epd-file-input" type="file" accept="image/*" />
+              <input ref={fileInputRef} className="epd-file-input" type="file" accept="image/*" onChange={onFileChange}/>
             </div>
           </div>
 
