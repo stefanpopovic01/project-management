@@ -12,9 +12,17 @@ export const getFollowing = (id) => {
     return api.get(`/api/auth/user/${id}/following/`);
 }
 
+// export const editUser = (id, form) => {
+//     return api.patch(`/api/auth/user/${id}/`, form);
+// }
+
 export const editUser = (id, form) => {
-    return api.patch(`/api/auth/user/${id}/`, form);
-}
+    return api.post(`/api/auth/user/${id}/`, form, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+};
 
 export const follow = (id) => {
     return api.post(`/api/auth/user/${id}/follow/`);
