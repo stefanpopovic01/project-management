@@ -35,15 +35,26 @@ class AbsoluteImageMixin:
         return f"{base_url.rstrip('/')}{obj.image.url}"
 
 class UserSearchSerializer(AbsoluteImageMixin, serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
+    # image = serializers.SerializerMethodField()
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'initials', 'image', 'email']
 
+# 2. ADD this method at the bottom of the class:
+    def to_representation(self, instance):
+        """ This method controls what data gets SENT to React """
+        # Get the default serialized data (handles strings, lists, numbers)
+        data = super().to_representation(instance)
+        
+        # Manually run your mixin logic to turn the image URL absolute for React
+        data['image'] = self.get_image(instance)
+        
+        return data
+
 class UserSerializer(AbsoluteImageMixin, serializers.ModelSerializer):
     followers_count = serializers.IntegerField(source='followers.count', read_only=True)
     following_count = serializers.IntegerField(source='following.count', read_only=True)
-    image = serializers.SerializerMethodField()  # added
+    # image = serializers.SerializerMethodField()  # added
 
     # We do not have these two fields in model so we need to create them here, and source='followers.count' is equal to: followers.count()
 
@@ -54,6 +65,17 @@ class UserSerializer(AbsoluteImageMixin, serializers.ModelSerializer):
             'position', 'company', 'location', 'bio', 'image', 
             'skills', 'initials', 'followers_count', 'following_count', 'created_at'
         ]
+
+    # 2. ADD this method at the bottom of the class:
+    def to_representation(self, instance):
+        """ This method controls what data gets SENT to React """
+        # Get the default serialized data (handles strings, lists, numbers)
+        data = super().to_representation(instance)
+        
+        # Manually run your mixin logic to turn the image URL absolute for React
+        data['image'] = self.get_image(instance)
+        
+        return data
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):

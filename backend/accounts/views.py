@@ -49,11 +49,18 @@ class UserSearchView(generics.ListAPIView):
 # ListAPIView is another prebuilt class-based view in Django REST Framework.
 # It is used when you want to create an endpoint that: only returns a list of objects (GET request)
 
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAccountOwnerOrReadOnly]
-    """ We need here to Delete Projects & Tasks & Notifications related to User when deleting. Implement later.. """
+    
+    # Force Django to accept multipart form files and standard text fields together
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def post(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
 
 # it defines a ready-made API endpoint that works with a single object (one user)
 # we have everything here, get, patch, post, delete 

@@ -36,12 +36,16 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'cloudinary_storage',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+
+
     'django.contrib.staticfiles',
+    'cloudinary',
 
     'django.contrib.postgres',
     "corsheaders",
@@ -151,11 +155,6 @@ AUTH_USER_MODEL = 'accounts.User'
 
 import os
 
-# The absolute filesystem path to the directory that will hold user-uploaded files
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# The URL that handles the media served from MEDIA_ROOT
-MEDIA_URL = '/media/'
 
 from datetime import timedelta
 SIMPLE_JWT = {
@@ -200,3 +199,26 @@ LOGGING = {
         "level": "INFO",  # Captures INFO, WARNING, and ERROR logs
     },
 }
+
+# Tell Django to route media uploads through Cloudinary
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+    'SECURE': True, # Forces HTTPS links globally
+}
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# The absolute filesystem path to the directory that will hold user-uploaded files
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# The URL that handles the media served from MEDIA_ROOT
+MEDIA_URL = '/media/'
