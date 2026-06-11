@@ -50,7 +50,11 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+// Check if the 401 error is coming from the login route
+        const isLoginRequest = originalRequest.url?.includes("/api/auth/login/") || originalRequest.url?.includes("/login");
+
+        // 1. ONLY intercept 401s if it is NOT a login request
+        if (error.response?.status === 401 && !originalRequest._retry && !isLoginRequest) {
             console.error("[401] Unauthorized — token missing or expired.");
             originalRequest._retry = true; 
 
@@ -76,6 +80,11 @@ api.interceptors.response.use(
                 }
                 return Promise.reject(refreshError);
             }
+        }
+
+        // 2. If it WAS a 401 from a login request, let it fall through normally here:
+        if (error.response?.status === 401 && isLoginRequest) {
+            console.warn("[LOGIN FAILED] Incorrect credentials entered.");
         }
 
         if (error.response?.status === 403) {
