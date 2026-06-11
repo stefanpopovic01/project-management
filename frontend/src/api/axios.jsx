@@ -7,8 +7,7 @@ export const setSessionExpiredHandler = (handler) => {
 };
 
 const api = axios.create({
-    // baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:8000",
-    baseURL: "http://127.0.0.1:8000",
+    baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:8000",
     timeout: 10000,
     headers: {
         "Content-Type": "application/json",
@@ -32,14 +31,14 @@ api.interceptors.request.use(
         return config;
     },
     (error) => {
-        console.error("[REQUEST ERROR]", error);  
+        if (import.meta.env.DEV) console.error("[REQUEST ERROR]", error);  
         return Promise.reject(error); 
     }
 );
 
 api.interceptors.response.use(
     (response) => {
-
+        // Cleanly hidden from production logs automatically
         if (import.meta.env.DEV) {
             console.log("[RESPONSE]", response.status, response.config.url);
             console.log("[DATA]", response.data);
@@ -49,20 +48,18 @@ api.interceptors.response.use(
     },
     async (error) => {
         const originalRequest = error.config;
-
-// Check if the 401 error is coming from the login route
         const isLoginRequest = originalRequest.url?.includes("/api/auth/login/") || originalRequest.url?.includes("/login");
 
-        // 1. ONLY intercept 401s if it is NOT a login request
         if (error.response?.status === 401 && !originalRequest._retry && !isLoginRequest) {
-            console.error("[401] Unauthorized — token missing or expired.");
+            if (import.meta.env.DEV) console.error("[401] Unauthorized — token missing or expired.");
             originalRequest._retry = true; 
 
             try {
                 const refreshToken = localStorage.getItem("refreshToken");
                 if (!refreshToken) throw new Error("No refresh token available.");
 
-                const response = await axios.post("http://127.0.0.1:8000/api/auth/token/refresh/", {
+                //  FIXED: Uses relative endpoint structure so it dynamically targets Render
+                const response = await api.post("/api/auth/token/refresh/", {
                     refresh: refreshToken,
                 });
 
@@ -73,7 +70,7 @@ api.interceptors.response.use(
                 return api(originalRequest); 
                 
             } catch (refreshError) {
-                console.error("[REFRESH FAILED] Refresh token is also expired or invalid.");
+                if (import.meta.env.DEV) console.error("[REFRESH FAILED] Refresh token is also expired or invalid.");
                 
                 if (sessionExpiredHandler) {
                     sessionExpiredHandler(true);
@@ -82,36 +79,23 @@ api.interceptors.response.use(
             }
         }
 
-        // 2. If it WAS a 401 from a login request, let it fall through normally here:
-        if (error.response?.status === 401 && isLoginRequest) {
-            console.warn("[LOGIN FAILED] Incorrect credentials entered.");
-        }
+        // Keep console errors wrapped in DEV checks if you want total silence in production
+        if (import.meta.env.DEV) {
+            if (error.response?.status === 401 && isLoginRequest) {
+                console.warn("[LOGIN FAILED] Incorrect credentials entered.");
+            }
+            if (error.response?.status === 403) console.error("[403] Forbidden — no permission.");
+            if (error.response?.status === 404) console.error("[404] Not found.");
+            if (error.response?.status === 500) console.error("[500] Server error!");
+            if (!error.response) console.error("[NETWORK ERROR] Connection error.");
+            if (error.code === "ECONNABORTED") console.error("[TIMEOUT] Server timed out.");
 
-        if (error.response?.status === 403) {
-            console.error("[403] Forbidden — authenticated but no permission.");
+            console.error("[ERROR]", {
+                status: error.response?.status,
+                message: error.response?.data?.message || error.message,
+                url: error.config?.url,
+            });
         }
-
-        if (error.response?.status === 404) {
-            console.error("[404] Not found.");
-        }
-
-        if (error.response?.status === 500) {
-            console.error("[500] Server error!");
-        }
-
-        if (!error.response) {
-            console.error("[NETWORK ERROR] Server not connected or internet error.");
-        }
-
-        if (error.code === "ECONNABORTED") {
-            console.error("[TIMEOUT] Server do not respond.");
-        }
-
-        console.error("[ERROR]", {
-            status: error.response?.status,
-            message: error.response?.data?.message || error.message,
-            url: error.config?.url,
-        });
 
         return Promise.reject(error);  
     }
