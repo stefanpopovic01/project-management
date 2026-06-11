@@ -72,6 +72,10 @@ function Login() {
           Not registered? <span onClick={() => navigate("/register")}>Register</span>
         </p>
 
+        <p className="forgot-link">
+          Forgot your password? <span onClick={() => navigate("/forgot-password")}>Reset it here</span>
+        </p>
+
         {success && <p className="success-msg">Welcome back, you’re logged in!</p>}
         {error && <p className="error-msg">{error}</p>}
 

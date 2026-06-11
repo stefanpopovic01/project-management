@@ -14,6 +14,8 @@ import VerticalNavbar from './components/VerticalNavbar/VerticalNavbar'
 import DashboardProfile from './pages/DashboardProfile/DashboardProfile'
 import DashboardProjects from './pages/DashboardProjects/DashboardProjects'
 import DashboardSingleProject from './components/DashboardSingleProject/DashboardSingleProject'
+import ResetPassword from './pages/ResetPassword/ResetPassword'
+import ForgotPassword from './pages/ForgotPassword/ForgotPassword'
 
 import { Routes, Route, useLocation } from "react-router-dom";
 import { ProtectedRoute } from './routes/ProtectedRoute'
@@ -51,6 +53,8 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<AboutUs />} />
+          <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="*" element={<NotFound />} />
 
           <Route path="/dashboard" element={ <ProtectedRoute><Dashboard /></ProtectedRoute> } />
