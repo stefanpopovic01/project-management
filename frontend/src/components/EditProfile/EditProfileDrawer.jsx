@@ -168,13 +168,7 @@ export default function EditProfileDrawer({ isOpen, onClose, profile, onSave }) 
 
         if (form.image && typeof form.image !== "string" && form.image instanceof File) {
             dataPayload.append("image", form.image);
-}
-        // --- DEBUGGING LOGS ---
-console.log("--- WHAT REACT IS SENDING TO DJANGO ---");
-for (let [key, value] of dataPayload.entries()) {
-    console.log(`${key}:`, value, `(Type: ${typeof value})`);
-}
-console.log("---------------------------------------");
+        }
 
         try {
             const res = await editUser(id, dataPayload);
