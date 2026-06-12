@@ -38,7 +38,7 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
     (response) => {
-        // Cleanly hidden from production logs automatically
+
         if (import.meta.env.DEV) {
             console.log("[RESPONSE]", response.status, response.config.url);
             console.log("[DATA]", response.data);
@@ -58,7 +58,6 @@ api.interceptors.response.use(
                 const refreshToken = localStorage.getItem("refreshToken");
                 if (!refreshToken) throw new Error("No refresh token available.");
 
-                //  FIXED: Uses relative endpoint structure so it dynamically targets Render
                 const response = await api.post("/api/auth/token/refresh/", {
                     refresh: refreshToken,
                 });
@@ -79,7 +78,6 @@ api.interceptors.response.use(
             }
         }
 
-        // Keep console errors wrapped in DEV checks if you want total silence in production
         if (import.meta.env.DEV) {
             if (error.response?.status === 401 && isLoginRequest) {
                 console.warn("[LOGIN FAILED] Incorrect credentials entered.");
