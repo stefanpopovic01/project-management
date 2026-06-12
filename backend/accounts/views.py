@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
-from django.conf import settings  # Add this import at the top
+from django.conf import settings 
 
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -11,6 +11,7 @@ from .serializers import RegisterSerializer, UserSearchSerializer, MyTokenObtain
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .permissions import IsAccountOwnerOrReadOnly
 from notifications.models import Notification
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -22,14 +23,8 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
-# It’s a pre-built class-based view provided by DRF that already implements a full “create” endpoint for you. - POST Only
-# queryset - we need to refer it to Object we want to create, User in our case
-# Serializer defines what fields are acceptable, how data is validated and object created
-
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
-
-# This is just short class to change default DNF login 
 
 class UserSearchView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -46,24 +41,15 @@ class UserSearchView(generics.ListAPIView):
             
         return User.objects.none()
 
-# ListAPIView is another prebuilt class-based view in Django REST Framework.
-# It is used when you want to create an endpoint that: only returns a list of objects (GET request)
-
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAccountOwnerOrReadOnly]
     
-    # Force Django to accept multipart form files and standard text fields together
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def post(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
-
-# it defines a ready-made API endpoint that works with a single object (one user)
-# we have everything here, get, patch, post, delete 
 
 class FollowToggleView(APIView):
     permission_classes = [IsAuthenticated]
@@ -89,8 +75,6 @@ class FollowToggleView(APIView):
                 message=f"{me.first_name} {me.last_name} started following you."
             )
             return Response({"message": "Followed successfully", "following": True}, status=status.HTTP_201_CREATED)
-
-# APIView is the most basic building block for views in Django REST Framework. Manually defining what happens for each http method
 
 class FollowersListView(generics.ListAPIView):
     serializer_class = UserSearchSerializer
@@ -141,13 +125,12 @@ class PasswordResetRequestView(APIView):
             send_mail(
                 subject="Password Reset",
                 message=f"Click to reset your password: {reset_link}",
-                from_email=settings.DEFAULT_FROM_EMAIL,  # Change None to this
+                from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[email],
                 fail_silently=False,
             )
 
         except User.DoesNotExist:
-            # security: don't reveal if email exists
             pass
 
         return Response(

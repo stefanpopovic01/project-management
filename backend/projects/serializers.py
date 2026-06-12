@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from .models import Project, ProjectMember, ProjectInvite, Task, ChecklistItem, Comment
 from accounts.serializers import UserSearchSerializer
 
-User = get_user_model() # Getting customized Abstract User from settings.py specifically AUTH_USER_MODEL
+User = get_user_model()
 
 class ProjectMemberSerializer(serializers.ModelSerializer):
     user = UserSearchSerializer(read_only=True)
@@ -16,7 +16,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     owner = UserSearchSerializer(read_only=True)
     members = ProjectMemberSerializer(source='projectmember_set', many=True, read_only=True)
     
-    total_tasks = serializers.SerializerMethodField() # "There is no database column for this. To get the value, look for a function in this class that starts with get_ followed by the field name.
+    total_tasks = serializers.SerializerMethodField()
     completed_tasks = serializers.SerializerMethodField()
     member_count = serializers.SerializerMethodField()
 

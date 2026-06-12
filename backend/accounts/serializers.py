@@ -19,9 +19,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
     
-    # Overriding create because if we do not password would be saved as a plain test and like this it will be hashed
-    # valdiated_date are clean, validated data from my API request
-
 
 class AbsoluteImageMixin:
     def get_image(self, obj):
@@ -35,18 +32,13 @@ class AbsoluteImageMixin:
         return f"{base_url.rstrip('/')}{obj.image.url}"
 
 class UserSearchSerializer(AbsoluteImageMixin, serializers.ModelSerializer):
-    # image = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'initials', 'image', 'email']
 
-# 2. ADD this method at the bottom of the class:
     def to_representation(self, instance):
-        """ This method controls what data gets SENT to React """
-        # Get the default serialized data (handles strings, lists, numbers)
         data = super().to_representation(instance)
-        
-        # Manually run your mixin logic to turn the image URL absolute for React
         data['image'] = self.get_image(instance)
         
         return data
@@ -54,9 +46,6 @@ class UserSearchSerializer(AbsoluteImageMixin, serializers.ModelSerializer):
 class UserSerializer(AbsoluteImageMixin, serializers.ModelSerializer):
     followers_count = serializers.IntegerField(source='followers.count', read_only=True)
     following_count = serializers.IntegerField(source='following.count', read_only=True)
-    # image = serializers.SerializerMethodField()  # added
-
-    # We do not have these two fields in model so we need to create them here, and source='followers.count' is equal to: followers.count()
 
     class Meta:
         model = User
@@ -66,13 +55,9 @@ class UserSerializer(AbsoluteImageMixin, serializers.ModelSerializer):
             'skills', 'initials', 'followers_count', 'following_count', 'created_at'
         ]
 
-    # 2. ADD this method at the bottom of the class:
     def to_representation(self, instance):
-        """ This method controls what data gets SENT to React """
-        # Get the default serialized data (handles strings, lists, numbers)
+
         data = super().to_representation(instance)
-        
-        # Manually run your mixin logic to turn the image URL absolute for React
         data['image'] = self.get_image(instance)
         
         return data
@@ -80,12 +65,7 @@ class UserSerializer(AbsoluteImageMixin, serializers.ModelSerializer):
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-        # Checks if username/password are correct
-
         data['user'] = UserSerializer(self.user, context={'request': self.context.get('request')}).data
-
-        # Uses the UserSerializer above to grab ALL data for the login response
         
         return data
     
-# This is custom Login serializer, DNF has default one that just returns tokens and this one returns all data in response

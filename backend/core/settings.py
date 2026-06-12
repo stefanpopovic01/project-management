@@ -109,15 +109,15 @@ STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
 
 REST_FRAMEWORK = {
-    # 1. Who can access your API by default
+
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
-    # 2. How the API identifies who the user is
+
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    "UNAUTHENTICATED_USER": None,  # This triggers 401 instead of 403
+    "UNAUTHENTICATED_USER": None,
 }
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -132,15 +132,6 @@ SIMPLE_JWT = {
 
 SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')
 
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-# EMAIL_HOST = "smtp.gmail.com"
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-# EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
 BREVO_API_KEY = os.getenv("BREVO_API_KEY")
 
@@ -153,9 +144,7 @@ EMAIL_PORT = 465
 EMAIL_USE_TLS = False  
 EMAIL_USE_SSL = True  
 
-# EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-# EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 LOGGING = {

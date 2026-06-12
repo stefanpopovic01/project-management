@@ -23,18 +23,15 @@ class ProjectViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         
-        # New parameters for search, status, and profile viewing
         target_user_id = self.request.query_params.get('user_id')
         filter_type = self.request.query_params.get('filter')
         search = self.request.query_params.get('search')
 
-        # Logic for req.params.id || req.user.id
         if target_user_id:
             target_user = User.objects.filter(id=target_user_id).first() or user
         else:
             target_user = user
 
-        # 1. Base Filter (Targeted at the user being viewed)
         if filter_type == 'created':
             queryset = Project.objects.filter(owner=target_user) # GET /api/projects/?filter=created 
         
@@ -42,21 +39,18 @@ class ProjectViewSet(ModelViewSet):
             queryset = Project.objects.filter(members=target_user).exclude(owner=target_user) # GET /api/projects/?filter=assigned
 
         else:
-            queryset = Project.objects.filter(members=target_user) # GET /api/projects/ → Returns all projects (Created + Joined).
+            queryset = Project.objects.filter(members=target_user) # GET /api/projects/ Returns all projects (Created + Joined).
 
-        # 3. Search Logic (istartswith matches "starting with certain letters")
         if search:
             queryset = queryset.filter(title__istartswith=search)
 
-        # 5. Sorting (createdAt: -1)
         return queryset.order_by('-created_at').distinct()
 
-    def list(self, request, *args, **kwargs): # overriding the default behavior.
+    def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         
         total_matching = queryset.count()
 
-        # Limit logic
         limit = request.query_params.get('limit')
         if limit:
             try:
@@ -66,17 +60,11 @@ class ProjectViewSet(ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         
-        # Returns the exact format frontend expects
         return Response({
             "count": len(serializer.data),
             "projects": serializer.data,
             "totalCount": total_matching
         })
-
-    # def perform_create(self, serializer):
-    #     # This replaces the manual "create" logic and ensures 
-    #     # the creator is saved as the person currently logged in.
-    #     serializer.save(owner=self.request.user)
 
     def perform_create(self, serializer):
         project = serializer.save(owner=self.request.user)
@@ -92,7 +80,6 @@ class ProjectViewSet(ModelViewSet):
     def remove_member(self, request, pk=None):
         project = self.get_object()
 
-        # get user_id from request body
         user_id = request.data.get('user_id')
 
         if not user_id:
@@ -101,14 +88,12 @@ class ProjectViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # find membership
         member = get_object_or_404(
             ProjectMember,
             project=project,
             user_id=user_id
         )
 
-        # optional safety: prevent removing owner
         if member.user == project.owner:
             return Response(
                 {"detail": "You cannot remove project owner"},
@@ -302,9 +287,9 @@ class TaskViewSet(ModelViewSet):
                 task=task
             )
 
-    @action(detail=True, methods=['post'], url_path='comments') # detail=True already handles the task relation — it means the URL is /tasks/{pk}/add_comment/, so pk is the task ID
+    @action(detail=True, methods=['post'], url_path='comments')
     def add_comment(self, request, pk=None):
-        task = self.get_object()  # this fetches the task by pk AND runs has_object_permission
+        task = self.get_object()
         body = request.data.get('body')
 
         if not body:
@@ -405,9 +390,3 @@ class TaskViewSet(ModelViewSet):
             "message": "Checklist item added successfully.",
             "checklist_item": ChecklistSerializer(checklist_item).data
         }, status=status.HTTP_201_CREATED)
-
-
-'''
-url_path='checklist/(?P<item_id>[^/.]+)' — this captures the item ID from the URL so your endpoint looks like PATCH 
-/tasks/{pk}/checklist/{item_id}/ 
-'''
