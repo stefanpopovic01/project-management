@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'accounts',
     'projects',
     'notifications',
+    "anymail",
 ]
 
 MIDDLEWARE = [
@@ -140,8 +141,12 @@ SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')
 # DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_BACKEND = "django_brevo.mail.BrevoBackend"
+EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
 BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+
+ANYMAIL = {
+    "BREVO_API_KEY": os.getenv("BREVO_API_KEY"),
+}
 
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 465
