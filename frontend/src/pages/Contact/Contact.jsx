@@ -4,14 +4,40 @@ import { useState } from "react";
 const Contact = () => {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${import.meta.env.REACT_APP_FORMSPREE}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (response.ok) {
+        setSubmitted(true);
+        setForm({ name: "", email: "", subject: "", message: "" });
+      } else {
+        const data = await response.json();
+        setError(data.error || "Something went wrong. Please try again.");
+      }
+    } catch (err) {
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -72,6 +98,7 @@ const Contact = () => {
               </div>
             ) : (
               <form className="contact-form" onSubmit={handleSubmit}>
+                {error && <div className="contact-error" style={{ color: "red", marginBottom: "1rem" }}>{error}</div>}
                 <div className="contact-row">
                   <div className="contact-field">
                     <label htmlFor="name">Name</label>
@@ -125,8 +152,8 @@ const Contact = () => {
                   />
                 </div>
 
-                <button type="submit" className="contact-submit">
-                  Send message
+                <button type="submit" className="contact-submit" disabled={submitting}>
+                  {submitting ? "Sending..." : "Send message"}
                 </button>
               </form>
             )}
