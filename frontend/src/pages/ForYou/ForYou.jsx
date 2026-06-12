@@ -134,21 +134,44 @@ export default function ForYou({ currentUser }) {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
+  // const fetchDashboardData = async () => {
+  //   try {
+  //     setLoading(true);
+
+  //     const [taskRes, projectRes, assignedRes, notificationRes] = await Promise.all([
+  //       getUserTasks(id),
+  //       getCreatedProjects(id, "", 4),
+  //       getAssignedProjects(id, "", 4),
+  //       getNotifications()
+  //     ]);
+
+  //     setUserTasks(taskRes.data)
+  //     setProjects(projectRes.data)
+  //     setAssigned(assignedRes.data)
+  //     setNotifications(notificationRes.data)
+
+  //   } catch (err) {
+  //     console.error("Error loading dashboard data:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchDashboardData = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
 
-      const [taskRes, projectRes, assignedRes, notificationRes] = await Promise.all([
-        getUserTasks(id),
-        getCreatedProjects(id, "", 4),
-        getAssignedProjects(id, "", 4),
-        getNotifications()
-      ]);
+      const projectRes = await getCreatedProjects(id, "", 4);
+      setProjects(projectRes.data);
 
-      setUserTasks(taskRes.data)
-      setProjects(projectRes.data)
-      setAssigned(assignedRes.data)
-      setNotifications(notificationRes.data)
+      const assignedRes = await getAssignedProjects(id, "", 4);
+      setAssigned(assignedRes.data);
+
+      const taskRes = await getUserTasks(id);
+      setUserTasks(taskRes.data);
+
+      const notificationRes = await getNotifications();
+      setNotifications(notificationRes.data);
 
     } catch (err) {
       console.error("Error loading dashboard data:", err);
