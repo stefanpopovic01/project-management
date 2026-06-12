@@ -17,7 +17,7 @@ const Contact = () => {
     setError(null);
 
     try {
-      const response = await fetch(`https://formspree.io/f/mnjygekl`, {
+      const response = await fetch(import.meta.env.VITE_FORMSPREE_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
